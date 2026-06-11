@@ -1,0 +1,6 @@
+{
+  "name": "Casa Verde",
+  "description": "Sophisticated Crêperie and Gourmet Delivery application.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
