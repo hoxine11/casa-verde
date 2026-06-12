@@ -115,10 +115,11 @@ ORDER BY p.id DESC
 
     res.status(200).json(result.rows);
   } catch (error) {
-    console.log(error);
+  console.error(error);
 
-    res.status(500).json({
-      message: "Erreur serveur",
-    });
-  }
+  res.status(500).json({
+    error: error.message,
+    detail: error
+  });
+}
 };
