@@ -41,7 +41,7 @@ export default function AdminClients({ orders }: AdminClientsProps) {
     }
     
     customerMap[key].ordersCount += 1;
-    if (order.status !== 'Cancelled') {
+    if (order.status !== 'cancelled') {
       customerMap[key].totalSpent += order.total;
     }
   });

@@ -175,48 +175,47 @@ ${order.status === 'pending'
                       </select>
                     </td>
                     <td className="px-6 py-4 text-center">
-                     <div className="flex items-center justify-center space-x-2">
+                      <div className="flex items-center justify-center space-x-2">
 
-  <button
-    onClick={() => setSelectedOrder(order)}
-    className="p-2 border border-brand-green/10 hover:border-brand-green hover:bg-brand-green hover:text-brand-ivory rounded-full text-brand-green transition-all cursor-pointer"
-    title="Voir le bon de commande"
-  >
-    <Eye className="w-3.5 h-3.5" />
-  </button>
+                        <button
+                          onClick={() => setSelectedOrder(order)}
+                          className="p-2 border border-brand-green/10 hover:border-brand-green hover:bg-brand-green hover:text-brand-ivory rounded-full text-brand-green transition-all cursor-pointer"
+                          title="Voir le bon de commande"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                        </button>
 
-  <button
-    onClick={() => printOrder(order)}
-    disabled={order.status !== "confirmed"}
-    className={`p-2 rounded-full transition-all
-      ${
-        order.status === "confirmed"
-          ? "border border-blue-200 bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-600 cursor-pointer"
-          : "border border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
-      }
+                        <button
+                          onClick={() => printOrder(order)}
+                          disabled={order.status !== "confirmed"}
+                          className={`p-2 rounded-full transition-all
+      ${order.status === "confirmed"
+                              ? "border border-blue-200 bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-600 cursor-pointer"
+                              : "border border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
+                            }
     `}
-    title={
-      order.status === "confirmed"
-        ? "Imprimer"
-        : "Confirmez la commande d'abord"
-    }
-  >
-    🖨
-  </button>
+                          title={
+                            order.status === "confirmed"
+                              ? "Imprimer"
+                              : "Confirmez la commande d'abord"
+                          }
+                        >
+                          🖨
+                        </button>
 
-  <button
-    onClick={() => {
-      if (confirm("Voulez-vous vraiment supprimer cette commande ?")) {
-        onDeleteOrder(order.id);
-      }
-    }}
-    className="p-2 border border-rose-100 bg-rose-50/50 hover:bg-rose-500 hover:text-white rounded-full text-rose-600 transition-all cursor-pointer"
-    title="Supprimer définitivement"
-  >
-    <Trash2 className="w-3.5 h-3.5" />
-  </button>
+                        <button
+                          onClick={() => {
+                            if (confirm("Voulez-vous vraiment supprimer cette commande ?")) {
+                              onDeleteOrder(order.id);
+                            }
+                          }}
+                          className="p-2 border border-rose-100 bg-rose-50/50 hover:bg-rose-500 hover:text-white rounded-full text-rose-600 transition-all cursor-pointer"
+                          title="Supprimer définitivement"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
 
-</div>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -278,15 +277,36 @@ ${order.status === 'pending'
               {/* Ordered Products list */}
               <div className="py-4 border-b border-brand-green/10">
                 <h4 className="font-serif text-sm font-semibold text-brand-green mb-3">Détail des plats</h4>
-                <ul className="space-y-2 font-sans text-xs">
+                <ul className="space-y-3 font-sans text-xs">
                   {selectedOrder.items.map((item) => (
-                    <li key={item.id} className="flex justify-between items-center text-brand-green/90">
-                      <span>
-                        {item.quantity}× <strong className="font-medium text-brand-green-dark">{item.name}</strong>
-                      </span>
-                      <span className="font-semibold text-brand-green/80">
-                        {(item.price * item.quantity).toLocaleString()} DZD
-                      </span>
+                    <li
+                      key={item.id}
+                      className="border-b border-brand-green/5 pb-3"
+                    >
+                      <div className="flex justify-between items-center">
+                        <span>
+                          {item.quantity}×{" "}
+                          <strong className="font-medium text-brand-green-dark">
+                            {item.name}
+                          </strong>
+                        </span>
+
+                        <span className="font-semibold text-brand-green/80">
+                          {(item.price * item.quantity).toLocaleString()} DZD
+                        </span>
+                      </div>
+
+                      {item.variant_name && (
+                        <div className="mt-1 text-[11px] text-brand-gold-dark">
+                          Taille : {item.variant_name}
+                        </div>
+                      )}
+
+                      {item.option_name && (
+                        <div className="text-[11px] text-brand-gold-dark">
+                          Gratiné : {item.option_name}
+                        </div>
+                      )}
                     </li>
                   ))}
                 </ul>

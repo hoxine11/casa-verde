@@ -12,6 +12,9 @@ export interface Product {
   is_active: boolean;
   category: string;
   category_id: number;
+
+  selectedVariant?: ProductVariant | null;
+  selectedOption?: ProductOption | null;
 }
 
 export interface Category {
@@ -24,6 +27,9 @@ export interface Category {
 export interface CartItem {
   product: Product;
   quantity: number;
+
+  selectedVariant?: ProductVariant | null;
+  selectedOption?: ProductOption | null;
 }
 
 export interface OrderItem {
@@ -32,6 +38,9 @@ export interface OrderItem {
   name: string;
   price: number;
   quantity: number;
+
+  variant_name?: string;
+  option_name?: string;
 }
 
 export interface Order {
@@ -69,4 +78,18 @@ export interface Customer {
   address: string;
   ordersCount: number;
   totalSpent: number;
+}
+export interface ProductVariant {
+  id: number;
+  product_id: number;
+  name: string;
+  price: number;
+}
+
+export interface ProductOption {
+  id: number;
+  product_id: number;
+  name: string;
+  price: number;
+  option_group: string;
 }

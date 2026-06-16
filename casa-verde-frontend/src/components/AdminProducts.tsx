@@ -157,6 +157,8 @@ export default function AdminProducts({
       formData.append("name", name);
       formData.append("description", description);
       formData.append("price", String(price));
+      console.log("CATEGORY =", selectedCategory);
+      console.log("CATEGORY ID =", selectedCategory?.id);
       formData.append(
         "category_id",
         String(selectedCategory.id)
@@ -175,7 +177,7 @@ export default function AdminProducts({
 
       if (editProduct) {
         await fetch(
-          `https://casa-verde-production-2e18.up.railway.app/api/products/${editProduct.id}`,
+          `https://casa-verde-production-1d5f.up.railway.app/api/products/${editProduct.id}`,
           {
             method: "PUT",
             body: formData
@@ -183,7 +185,7 @@ export default function AdminProducts({
         );
       } else {
         await fetch(
-          "https://casa-verde-production-2e18.up.railway.app/api/products",
+          "https://casa-verde-production-1d5f.up.railway.app/api/products",
           {
             method: "POST",
             body: formData
@@ -558,39 +560,39 @@ export default function AdminProducts({
                   <div className="px-5 py-3.5 bg-brand-green/5 border-t border-brand-green/10 flex items-center justify-between">
                     {/* Active toggle */}
                     <button
-  onClick={async () => {
-    try {
-      const categoryObj = categories.find(
-        (c) => c.name === product.category
-      );
+                      onClick={async () => {
+                        try {
+                          const categoryObj = categories.find(
+                            (c) => c.name === product.category
+                          );
 
-      await fetch(
-        `https://casa-verde-production-2e18.up.railway.app/api/products/${product.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            name: product.name,
-            description: product.description,
-            price: product.price,
-            category_id: categoryObj?.id,
-            is_active: !product.is_active
-          })
-        }
-      );
+                          await fetch(
+                            `https://casa-verde-production-1d5f.up.railway.app/api/products/${product.id}`,
+                            {
+                              method: "PUT",
+                              headers: {
+                                "Content-Type": "application/json"
+                              },
+                              body: JSON.stringify({
+                                name: product.name,
+                                description: product.description,
+                                price: product.price,
+                                category_id: categoryObj?.id,
+                                is_active: !product.is_active
+                              })
+                            }
+                          );
 
-      await refreshProducts();
+                          await refreshProducts();
 
-    } catch (error) {
-      console.error(error);
-    }
-  }}
-  className="px-3 py-1 rounded-full border border-brand-green/20 hover:border-brand-green bg-white text-brand-green text-[10px] font-semibold transition-all cursor-pointer"
->
-  {product.is_active ? 'Désactiver' : 'Activer'}
-</button>
+                        } catch (error) {
+                          console.error(error);
+                        }
+                      }}
+                      className="px-3 py-1 rounded-full border border-brand-green/20 hover:border-brand-green bg-white text-brand-green text-[10px] font-semibold transition-all cursor-pointer"
+                    >
+                      {product.is_active ? 'Désactiver' : 'Activer'}
+                    </button>
 
                     <div className="flex items-center space-x-2">
                       <button
@@ -607,7 +609,7 @@ export default function AdminProducts({
 
                           try {
                             await fetch(
-                              `https://casa-verde-production-2e18.up.railway.app/api/products/${product.id}`,
+                              `https://casa-verde-production-1d5f.up.railway.app/api/products/${product.id}`,
                               {
                                 method: "DELETE"
                               }

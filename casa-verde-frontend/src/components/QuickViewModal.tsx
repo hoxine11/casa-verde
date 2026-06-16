@@ -5,7 +5,9 @@
 
 import { X, Plus, Clock, ShieldAlert } from 'lucide-react';
 import { motion } from 'motion/react';
-import { Product } from '../types';
+
+import { Product, ProductVariant, ProductOption } from '../types';
+import { useState , useEffect} from 'react';
 
 interface QuickViewModalProps {
   product: Product | null;
@@ -13,7 +15,49 @@ interface QuickViewModalProps {
   onAddToCart: (product: Product) => void;
 }
 
-export default function QuickViewModal({ product, onClose, onAddToCart }: QuickViewModalProps) {
+
+
+export default function QuickViewModal({
+  product,
+  onClose,
+  onAddToCart
+}: QuickViewModalProps) {
+
+  const [variants, setVariants] =
+    useState<ProductVariant[]>([]);
+
+  const [options, setOptions] =
+    useState<ProductOption[]>([]);
+
+  const [selectedVariant, setSelectedVariant] =
+    useState<ProductVariant | null>(null);
+
+  const [selectedOption, setSelectedOption] =
+    useState<ProductOption | null>(null);
+
+  useEffect(() => {
+    if (!product) return;
+
+    fetch(
+      `https://casa-verde-production-1d5f.up.railway.app/api/product-variants/${product.id}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        setVariants(data);
+      })
+      .catch(console.error);
+
+    fetch(
+      `https://casa-verde-production-1d5f.up.railway.app/api/product-options/${product.id}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        setOptions(data);
+      })
+      .catch(console.error);
+
+  }, [product]);
+
   if (!product) return null;
 
   return (
@@ -46,7 +90,7 @@ export default function QuickViewModal({ product, onClose, onAddToCart }: QuickV
 
           {/* Two-Column Responsive Layout */}
           <div className="grid grid-cols-1 md:grid-cols-2">
-            
+
             {/* Left: Product Image */}
             <div className="relative aspect-square md:aspect-auto md:h-full min-h-[300px] bg-brand-ivory select-none border-r border-brand-green/5">
               <img
@@ -66,31 +110,115 @@ export default function QuickViewModal({ product, onClose, onAddToCart }: QuickV
                 <span className="font-sans text-[9px] uppercase tracking-[0.25em] font-bold text-brand-gold-dark mb-2 block">
                   Création Spéciale Casa Verde
                 </span>
-                
+
                 <h3 className="font-serif text-2xl font-bold text-brand-green mb-4">
                   {product.name}
                 </h3>
-                
+
                 <p className="font-sans text-xs text-brand-green/80 leading-relaxed font-light mb-6">
                   {product.description || 'Une délicieuse création artisanale préparée à la commande avec des ingrédients frais.'}
                 </p>
 
                 {/* Additional metadata features for a authentic premium feel */}
-               
-              </div>
 
+              </div>
+              {
+                product.category?.toLowerCase() === "tacos" && (
+                  <div className="space-y-6 mb-6">
+
+                    {/* Taille */}
+                    <div>
+                      <h4 className="font-semibold text-brand-green mb-3">
+                        Choisissez votre taille
+                      </h4>
+
+                      <div className="space-y-2">
+                        {variants.map((variant) => (
+                          <label
+                            key={variant.id}
+                            className="flex items-center justify-between border p-3 cursor-pointer"
+                          >
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="radio"
+                                name="variant"
+                                checked={selectedVariant?.id === variant.id}
+                                onChange={() => setSelectedVariant(variant)}
+                              />
+
+                              <span>{variant.name}</span>
+                            </div>
+
+                            <span>
+                              {variant.price} DA
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Gratiné */}
+                    <div>
+                      <h4 className="font-semibold text-brand-green mb-3">
+                        Gratiné
+                      </h4>
+
+                      <div className="space-y-2">
+                        {options.map((option) => (
+                          <label
+                            key={option.id}
+                            className="flex items-center justify-between border p-3 cursor-pointer"
+                          >
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="radio"
+                                name="gratine"
+                                checked={selectedOption?.id === option.id}
+                                onChange={() => setSelectedOption(option)}
+                              />
+
+                              <span>
+                                {option.name}
+                              </span>
+                            </div>
+
+                            <span>
+                              +{option.price} DA
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                  </div>
+                )
+              }
               {/* Price and Cart Action */}
               <div className="flex items-center justify-between pt-4 border-t border-brand-green/10">
                 <div>
                   <span className="font-serif text-2xl font-bold text-brand-green">
-                    {product.price.toLocaleString()}
+                    {
+                      (
+                        (selectedVariant?.price || product.price)
+                        +
+                        (selectedOption?.price || 0)
+                      ).toLocaleString()
+                    }
                   </span>
                   <span className="font-sans text-[10px] font-bold text-brand-gold ml-1 tracking-wider">DZD</span>
                 </div>
 
                 <button
                   onClick={() => {
-                    onAddToCart(product);
+                    onAddToCart({
+                      ...product,
+                      selectedVariant,
+                      selectedOption,
+                      price:
+                        (selectedVariant?.price || product.price)
+                        +
+                        (selectedOption?.price || 0)
+                    });
                     onClose();
                   }}
                   className="px-6 py-3 bg-brand-green hover:bg-brand-gold text-brand-ivory hover:text-brand-green text-xs font-semibold uppercase tracking-[0.15em] transition-all duration-300 border border-brand-green/20 hover:border-brand-gold/30 cursor-pointer"

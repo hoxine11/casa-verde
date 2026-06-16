@@ -53,7 +53,7 @@ const INITIAL_SETTINGS: Settings = {
   restaurantName: 'Casa Verde – Crêperie AS',
   phone: '+213 5 55 12 34 56',
   address: 'Rue Didouche Mourad, Alger Centre',
-  deliveryFee: 200,
+  deliveryFee: 0,
   facebook: 'https://facebook.com/casaverde',
   instagram: 'https://instagram.com/casaverde'
 };
@@ -143,7 +143,7 @@ export default function App() {
     console.log("Categories loaded:", categories);
   }, [categories]);
   useEffect(() => {
-    fetch("https://casa-verde-production-2e18.up.railway.app/api/categories")
+    fetch("https://casa-verde-production-1d5f.up.railway.app/api/categories")
       .then((res) => res.json())
       .then((data) => {
         setCategories(data);
@@ -158,7 +158,7 @@ export default function App() {
     console.log("Products loaded:", products);
   }, [products]);
   useEffect(() => {
-    fetch("https://casa-verde-production-2e18.up.railway.app/api/products")
+    fetch("https://casa-verde-production-1d5f.up.railway.app/api/products")
       .then((res) => res.json())
       .then((data) => {
         setProducts(data);
@@ -169,7 +169,7 @@ export default function App() {
   }, []);
   const refreshCategories = async () => {
     const res = await fetch(
-      "https://casa-verde-production-2e18.up.railway.app/api/categories"
+      "https://casa-verde-production-1d5f.up.railway.app/api/categories"
     );
 
     const data = await res.json();
@@ -179,7 +179,7 @@ export default function App() {
 
   const refreshProducts = async () => {
     const res = await fetch(
-      "https://casa-verde-production-2e18.up.railway.app/api/products"
+      "https://casa-verde-production-1d5f.up.railway.app/api/products"
     );
 
     const data = await res.json();
@@ -194,7 +194,7 @@ export default function App() {
   const [orders, setOrders] = useState<Order[]>([]);
 
   useEffect(() => {
-    fetch("https://casa-verde-production-2e18.up.railway.app/api/orders")
+    fetch("https://casa-verde-production-1d5f.up.railway.app/api/orders")
       .then((res) => res.json())
       .then((data) => {
         console.log("ORDERS API =>", data);
@@ -211,7 +211,16 @@ export default function App() {
           date: new Date(order.created_at).toLocaleString(),
           status: order.status.toLowerCase(),
 
-          items: order.items || []
+          items: (order.items || []).map((item: any) => ({
+            id: item.id,
+            productId: item.productId,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+
+            variant_name: item.variant_name,
+            option_name: item.option_name,
+          }))
         }));
         console.log(mappedOrders);
         setOrders(mappedOrders);
@@ -233,7 +242,6 @@ export default function App() {
   const [checkoutName, setCheckoutName] = useState('');
   const [checkoutPhone, setCheckoutPhone] = useState('');
   const [checkoutAddress, setCheckoutAddress] = useState('');
-  const [checkoutNeighborhood, setCheckoutNeighborhood] = useState('Centre Ville');
   const [checkoutComment, setCheckoutComment] = useState('');
 
   // Succeeded order placeholder for tracking
@@ -271,7 +279,12 @@ export default function App() {
   // Handle Cart operators
   const handleAddToCart = (product: Product) => {
     setCart((prev) => {
-      const exists = prev.find((item) => item.product.id === product.id);
+      const exists = prev.find(
+        (item) =>
+          item.product.id === product.id &&
+          item.product.selectedVariant?.id === product.selectedVariant?.id &&
+          item.product.selectedOption?.id === product.selectedOption?.id
+      );
       if (exists) {
         return prev.map((item) =>
           item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
@@ -310,7 +323,6 @@ export default function App() {
         customerName: checkoutName,
         phone: checkoutPhone,
         address: checkoutAddress,
-        neighborhood: checkoutNeighborhood,
         comment: checkoutComment,
 
         subtotal: cartSubtotal,
@@ -321,11 +333,17 @@ export default function App() {
           productId: item.product.id,
           price: item.product.price,
           quantity: item.quantity,
+
+          variantName:
+            item.product.selectedVariant?.name || null,
+
+          optionName:
+            item.product.selectedOption?.name || null,
         })),
       };
 
       await fetch(
-        "https://casa-verde-production-2e18.up.railway.app/api/orders",
+        "https://casa-verde-production-1d5f.up.railway.app/api/orders",
         {
           method: "POST",
           headers: {
@@ -336,7 +354,7 @@ export default function App() {
       );
 
       const ordersRes = await fetch(
-        "https://casa-verde-production-2e18.up.railway.app/api/orders"
+        "https://casa-verde-production-1d5f.up.railway.app/api/orders"
       );
 
       const ordersData =
@@ -380,7 +398,7 @@ export default function App() {
   ) => {
     try {
       await fetch(
-        `https://casa-verde-production-2e18.up.railway.app/api/orders/${id}/status`,
+        `https://casa-verde-production-1d5f.up.railway.app/api/orders/${id}/status`,
         {
           method: "PUT",
           headers: {
@@ -391,7 +409,7 @@ export default function App() {
       );
 
       const res = await fetch(
-        "https://casa-verde-production-2e18.up.railway.app/api/orders"
+        "https://casa-verde-production-1d5f.up.railway.app/api/orders"
       );
 
       const data = await res.json();
@@ -420,14 +438,14 @@ export default function App() {
   const handleDeleteOrder = async (id: number) => {
     try {
       await fetch(
-        `https://casa-verde-production-2e18.up.railway.app/api/orders/${id}`,
+        `https://casa-verde-production-1d5f.up.railway.app/api/orders/${id}`,
         {
           method: "DELETE",
         }
       );
 
       const res = await fetch(
-        "https://casa-verde-production-2e18.up.railway.app/api/orders"
+        "https://casa-verde-production-1d5f.up.railway.app/api/orders"
       );
 
       const data = await res.json();
@@ -471,16 +489,42 @@ export default function App() {
     setProducts((prev) => prev.filter((p) => p.id !== id));
   };
 
-  const handleAddCategory = (name: string) => {
-    const newCat: Category = {
-      id: Date.now(),
-      name
-    };
-    setCategories((prev) => [...prev, newCat]);
+  const handleAddCategory = async (name: string) => {
+    try {
+      await fetch(
+        "https://casa-verde-production-1d5f.up.railway.app/api/categories",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ name })
+        }
+      );
+
+      await refreshCategories();
+
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  const handleDeleteCategory = (id: number) => {
-    setCategories((prev) => prev.filter((c) => c.id !== id));
+  const handleDeleteCategory = async (
+    id: number
+  ) => {
+    try {
+      await fetch(
+        `https://casa-verde-production-1d5f.up.railway.app/api/categories/${id}`,
+        {
+          method: "DELETE"
+        }
+      );
+
+      await refreshCategories();
+
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   // Interactive sample products adder for ease of grading (since menu starts empty per constraints)
@@ -843,7 +887,7 @@ export default function App() {
                   <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-green/40 w-4 h-4" />
                   <input
                     type="search"
-                    placeholder="Rechercher des délices..."
+
                     value={searchMenuQuery}
                     onChange={(e) => setSearchMenuQuery(e.target.value)}
                     className="w-full bg-brand-ivory border border-brand-green/15 rounded-full py-2.5 pl-10 pr-4 text-xs font-semibold text-brand-green outline-none focus:ring-1 focus:ring-brand-gold focus:border-brand-gold"
@@ -955,6 +999,17 @@ export default function App() {
                             <h3 className="font-serif text-base font-bold text-brand-green leading-snug">
                               {item.product.name}
                             </h3>
+                            {item.product.selectedVariant && (
+                              <p className="text-xs text-gray-500">
+                                Taille: {item.product.selectedVariant.name}
+                              </p>
+                            )}
+
+                            {item.product.selectedOption && (
+                              <p className="text-xs text-gray-500">
+                                {item.product.selectedOption.name}
+                              </p>
+                            )}
                             <p className="font-serif text-sm font-semibold text-brand-green/90 mt-1">
                               {item.product.price.toLocaleString()} DZD
                             </p>
@@ -1074,7 +1129,7 @@ export default function App() {
                         required
                         value={checkoutName}
                         onChange={(e) => setCheckoutName(e.target.value)}
-                        placeholder="ex: Yacine Boumediene"
+
                         className="w-full bg-brand-ivory border border-brand-green/10 rounded-xl py-3 px-4 text-brand-green outline-none focus:ring-1 focus:ring-brand-gold focus:border-brand-gold"
                       />
                     </div>
@@ -1087,14 +1142,14 @@ export default function App() {
                         required
                         value={checkoutPhone}
                         onChange={(e) => setCheckoutPhone(e.target.value)}
-                        placeholder="ex: +213 5 55 12 34 56"
+
                         className="w-full bg-brand-ivory border border-brand-green/10 rounded-xl py-3 px-4 text-brand-green outline-none focus:ring-1 focus:ring-brand-gold focus:border-brand-gold"
                       />
                     </div>
 
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 font-sans text-xs">
+                  <div className="grid grid-cols-1 gap-5 font-sans text-xs">
 
                     {/* Full Street Address */}
                     <div className="sm:col-span-2 space-y-2">
@@ -1104,27 +1159,13 @@ export default function App() {
                         required
                         value={checkoutAddress}
                         onChange={(e) => setCheckoutAddress(e.target.value)}
-                        placeholder="ex: Boulevard Mohamed Bougara, Étage 1"
+
                         className="w-full bg-brand-ivory border border-brand-green/10 rounded-xl py-3 px-4 text-brand-green outline-none focus:ring-1 focus:ring-brand-gold"
                       />
                     </div>
 
                     {/* Secteur / Quartier Dropdown select */}
-                    <div className="space-y-2">
-                      <label className="text-brand-green font-semibold block">Quartier / Secteur *</label>
-                      <select
-                        value={checkoutNeighborhood}
-                        onChange={(e) => setCheckoutNeighborhood(e.target.value)}
-                        className="w-full bg-brand-ivory border border-brand-green/10 rounded-xl py-3 px-4 text-brand-green outline-none focus:ring-1 focus:ring-brand-gold cursor-pointer"
-                      >
-                        <option value="Centre Ville">Centre Ville</option>
-                        <option value="Sidi M'Hamed">Sidi M'Hamed</option>
-                        <option value="El Biar">El Biar</option>
-                        <option value="Hydra">Hydra</option>
-                        <option value="Didouche">Didouche</option>
-                        <option value="Telemly">Telemly</option>
-                      </select>
-                    </div>
+
 
                   </div>
 
@@ -1134,7 +1175,6 @@ export default function App() {
                     <textarea
                       value={checkoutComment}
                       onChange={(e) => setCheckoutComment(e.target.value)}
-                      placeholder="ex: Code d'entrée 203, laisser devant la porte s'il vous plaît..."
                       rows={3}
                       className="w-full bg-brand-ivory border border-brand-green/10 rounded-xl py-3 px-4 text-brand-green outline-none focus:ring-1 focus:ring-brand-gold"
                     />
@@ -1320,7 +1360,7 @@ export default function App() {
                       try {
 
                         const res = await fetch(
-                          "https://casa-verde-production-2e18.up.railway.app/api/admin/login",
+                          "https://casa-verde-production-1d5f.up.railway.app/api/admin/login",
                           {
                             method: "POST",
                             headers: {
@@ -1381,7 +1421,7 @@ export default function App() {
                         required
                         value={loginUser}
                         onChange={(e) => setLoginUser(e.target.value)}
-                        placeholder="ex: admin"
+
                         className="w-full bg-brand-green/[0.03] border border-brand-green/10 py-3 px-4 text-brand-green placeholder-brand-green/20 outline-none focus:border-brand-gold transition-all"
                       />
                     </div>
@@ -1393,7 +1433,7 @@ export default function App() {
                         required
                         value={loginPass}
                         onChange={(e) => setLoginPass(e.target.value)}
-                        placeholder="••••••••"
+
                         className="w-full bg-brand-green/[0.03] border border-brand-green/10 py-3 px-4 text-brand-green placeholder-brand-green/20 outline-none focus:border-brand-gold transition-all"
                       />
                     </div>

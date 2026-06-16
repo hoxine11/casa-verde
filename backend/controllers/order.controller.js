@@ -1,36 +1,35 @@
 import pool from "../config/db.js";
 
 export const createOrder = async (req, res) => {
-try {
-const {
-customerName,
-phone,
-address,
-neighborhood,
-comment,
-subtotal,
-deliveryFee,
-total,
-items,
-} = req.body;
+  try {
+    const {
+      customerName,
+      phone,
+      address,
+      neighborhood,
+      comment,
+      subtotal,
+      deliveryFee,
+      total,
+      items,
+    } = req.body;
 
-
-// Recherche client par téléphone
-let customer = await pool.query(
-  `
+    // Recherche client par téléphone
+    let customer = await pool.query(
+      `
   SELECT * FROM customers
   WHERE phone = $1
   `,
-  [phone]
-);
+      [phone],
+    );
 
-let customerId;
+    let customerId;
 
-if (customer.rows.length > 0) {
-  customerId = customer.rows[0].id;
-} else {
-  const newCustomer = await pool.query(
-    `
+    if (customer.rows.length > 0) {
+      customerId = customer.rows[0].id;
+    } else {
+      const newCustomer = await pool.query(
+        `
     INSERT INTO customers
     (
       full_name,
@@ -42,25 +41,18 @@ if (customer.rows.length > 0) {
     ($1,$2,$3,$4)
     RETURNING *
     `,
-    [
-      customerName,
-      phone,
-      address,
-      neighborhood,
-    ]
-  );
+        [customerName, phone, address, neighborhood],
+      );
 
-  customerId = newCustomer.rows[0].id;
-}
+      customerId = newCustomer.rows[0].id;
+    }
 
-// Génération numéro commande
-const orderNumber =
-  "ORD-" +
-  Date.now();
+    // Génération numéro commande
+    const orderNumber = "ORD-" + Date.now();
 
-// Création commande
-const orderResult = await pool.query(
-  `
+    // Création commande
+    const orderResult = await pool.query(
+      `
   INSERT INTO orders
   (
     order_number,
@@ -75,65 +67,60 @@ const orderResult = await pool.query(
   ($1,$2,$3,$4,$5,$6,$7)
   RETURNING *
   `,
-  [
-    orderNumber,
-    customerId,
-    subtotal,
-    deliveryFee,
-    total,
-    "pending",
-    comment,
-  ]
-);
+      [
+        orderNumber,
+        customerId,
+        subtotal,
+        deliveryFee,
+        total,
+        "pending",
+        comment,
+      ],
+    );
 
-const order = orderResult.rows[0];
+    const order = orderResult.rows[0];
 
-// Création order items
-for (const item of items) {
-  await pool.query(
-    `
+    // Création order items
+    for (const item of items) {
+      await pool.query(
+        `
     INSERT INTO order_items
     (
       order_id,
       product_id,
       quantity,
-      unit_price,
-      total_price
+      price,
+      variant_name,
+      option_name
     )
-    VALUES
-    ($1,$2,$3,$4,$5)
+    VALUES ($1,$2,$3,$4,$5,$6)
     `,
-    [
-      order.id,
-      item.productId,
-      item.quantity,
-      item.price,
-      item.quantity * item.price,
-    ]
-  );
-}
+        [
+          order.id,
+          item.productId,
+          item.quantity,
+          item.price,
+          item.variantName,
+          item.optionName,
+        ],
+      );
+    }
 
-return res.status(201).json({
-  message: "Commande créée avec succès",
-  order,
-});
+    return res.status(201).json({
+      message: "Commande créée avec succès",
+      order,
+    });
+  } catch (error) {
+    console.log(error);
 
-
-} catch (error) {
-console.log(error);
-
-
-return res.status(500).json({
-  error: error.message,
-});
-
-
-}
+    return res.status(500).json({
+      error: error.message,
+    });
+  }
 };
 
 export const getOrders = async (req, res) => {
   try {
-
     const ordersResult = await pool.query(`
       SELECT
         o.id,
@@ -160,14 +147,15 @@ export const getOrders = async (req, res) => {
     const orders = ordersResult.rows;
 
     for (const order of orders) {
-
       const itemsResult = await pool.query(
         `
         SELECT
           oi.id,
           oi.product_id,
           oi.quantity,
-          oi.unit_price,
+          oi.price,
+          oi.variant_name,
+          oi.option_name,
 
           p.name
 
@@ -177,77 +165,72 @@ export const getOrders = async (req, res) => {
 
         WHERE oi.order_id = $1
         `,
-        [order.id]
+        [order.id],
       );
 
-      order.items = itemsResult.rows.map(item => ({
+      order.items = itemsResult.rows.map((item) => ({
         id: item.id,
         productId: item.product_id,
         name: item.name,
-        price: Number(item.unit_price),
-        quantity: item.quantity
+        price: Number(item.price),
+        quantity: item.quantity,
+
+        variant_name: item.variant_name,
+        option_name: item.option_name,
       }));
     }
-console.log(JSON.stringify(orders, null, 2));
+
     return res.json(orders);
-
   } catch (error) {
-
     console.log(error);
 
     return res.status(500).json({
-      error: error.message
+      error: error.message,
     });
   }
 };
 
 export const updateOrderStatus = async (req, res) => {
-try {
-const { id } = req.params;
-const { status } = req.body;
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
 
-
-const result = await pool.query(
-  `
+    const result = await pool.query(
+      `
   UPDATE orders
   SET status = $1
   WHERE id = $2
   RETURNING *
   `,
-  [status, id]
-);
+      [status, id],
+    );
 
-return res.json(result.rows[0]);
-
-
-} catch (error) {
-return res.status(500).json({
-error: error.message,
-});
-}
+    return res.json(result.rows[0]);
+  } catch (error) {
+    return res.status(500).json({
+      error: error.message,
+    });
+  }
 };
 
 export const deleteOrder = async (req, res) => {
-try {
-const { id } = req.params;
+  try {
+    const { id } = req.params;
 
-
-await pool.query(
-  `
+    await pool.query(
+      `
   DELETE FROM orders
   WHERE id = $1
   `,
-  [id]
-);
+      [id],
+    );
 
-return res.json({
-  message: "Commande supprimée",
-});
-
-
-} catch (error) {
-return res.status(500).json({
-error: error.message,
-});
-}
+    return res.json({
+      message: "Commande supprimée",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: error.message,
+    });
+  }
 };
