@@ -149,22 +149,22 @@ export const getOrders = async (req, res) => {
     for (const order of orders) {
       const itemsResult = await pool.query(
         `
-        SELECT
-          oi.id,
-          oi.product_id,
-          oi.quantity,
-          oi.price,
-          oi.variant_name,
-          oi.option_name,
+  SELECT
+    oi.id,
+    oi.product_id,
+    oi.quantity,
+    oi.unit_price,
+    oi.variant_name,
+    oi.option_name,
 
-          p.name
+    p.name
 
-        FROM order_items oi
-        LEFT JOIN products p
-        ON p.id = oi.product_id
+  FROM order_items oi
+  LEFT JOIN products p
+  ON p.id = oi.product_id
 
-        WHERE oi.order_id = $1
-        `,
+  WHERE oi.order_id = $1
+  `,
         [order.id],
       );
 
@@ -172,7 +172,7 @@ export const getOrders = async (req, res) => {
         id: item.id,
         productId: item.product_id,
         name: item.name,
-        price: Number(item.price),
+        price: Number(item.unit_price),
         quantity: item.quantity,
 
         variant_name: item.variant_name,
