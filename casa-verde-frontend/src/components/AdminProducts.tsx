@@ -28,7 +28,19 @@ export default function AdminProducts({
   const [category, setCategory] = useState('');
   const [image, setImage] = useState('');
   const [isActive, setIsActive] = useState(true);
+  const [variants, setVariants] = useState([
+    {
+      name: "",
+      price: ""
+    }
+  ]);
 
+  const [options, setOptions] = useState([
+    {
+      name: "",
+      price: ""
+    }
+  ]);
   // Photo taking & uploading state
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
@@ -166,6 +178,15 @@ export default function AdminProducts({
       formData.append(
         "is_active",
         String(isActive)
+      );
+      formData.append(
+        "variants",
+        JSON.stringify(variants)
+      );
+
+      formData.append(
+        "options",
+        JSON.stringify(options)
       );
 
       if (selectedFile) {
@@ -331,7 +352,104 @@ export default function AdminProducts({
                 className="w-full bg-brand-green/5 border border-brand-green/10 rounded-xl py-3 px-4 text-brand-green placeholder-brand-green/30 outline-none focus:ring-1 focus:ring-brand-gold focus:border-brand-gold transition-all"
               />
             </div>
+            <div className="space-y-3 border-t border-brand-green/10 pt-4">
+              <label className="font-bold text-brand-green">
+                Tailles
+              </label>
 
+              {variants.map((variant, index) => (
+                <div
+                  key={index}
+                  className="flex gap-3"
+                >
+                  <input
+                    type="text"
+                    placeholder="M"
+                    value={variant.name}
+                    onChange={(e) => {
+                      const copy = [...variants];
+                      copy[index].name = e.target.value;
+                      setVariants(copy);
+                    }}
+                    className="border rounded p-2 flex-1"
+                  />
+
+                  <input
+                    type="number"
+                    placeholder="500"
+                    value={variant.price}
+                    onChange={(e) => {
+                      const copy = [...variants];
+                      copy[index].price = e.target.value;
+                      setVariants(copy);
+                    }}
+                    className="border rounded p-2 flex-1"
+                  />
+                </div>
+              ))}
+
+              <button
+                type="button"
+                onClick={() =>
+                  setVariants([
+                    ...variants,
+                    { name: "", price: "" }
+                  ])
+                }
+                className="text-sm text-blue-600"
+              >
+                + Ajouter Taille
+              </button>
+            </div>
+            <div className="space-y-3">
+              <label className="font-bold text-brand-green">
+                Options
+              </label>
+
+              {options.map((option, index) => (
+                <div
+                  key={index}
+                  className="flex gap-3"
+                >
+                  <input
+                    type="text"
+                    placeholder="Camembert"
+                    value={option.name}
+                    onChange={(e) => {
+                      const copy = [...options];
+                      copy[index].name = e.target.value;
+                      setOptions(copy);
+                    }}
+                    className="border rounded p-2 flex-1"
+                  />
+
+                  <input
+                    type="number"
+                    placeholder="100"
+                    value={option.price}
+                    onChange={(e) => {
+                      const copy = [...options];
+                      copy[index].price = e.target.value;
+                      setOptions(copy);
+                    }}
+                    className="border rounded p-2 flex-1"
+                  />
+                </div>
+              ))}
+
+              <button
+                type="button"
+                onClick={() =>
+                  setOptions([
+                    ...options,
+                    { name: "", price: "" }
+                  ])
+                }
+                className="text-sm text-blue-600"
+              >
+                + Ajouter Option
+              </button>
+            </div>
             {/* Image Upload/Capture Panel */}
             <div className="space-y-3 pt-3 border-t border-brand-green/10">
               <label className="text-brand-green font-bold block text-xs">Visuel du produit (Photo ou Image)</label>
