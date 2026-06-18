@@ -13,6 +13,9 @@ export interface Product {
   category: string;
   category_id: number;
 
+  variants?: ProductVariant[];
+  options?: ProductOption[];
+
   selectedVariant?: ProductVariant | null;
   selectedOption?: ProductOption | null;
 }

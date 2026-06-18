@@ -6,7 +6,7 @@
 import { Plus, Eye } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Product } from '../types';
-
+import { useState } from 'react';
 interface ProductCardProps {
   product: Product;
   onAddToCart: (product: Product) => void;
@@ -15,6 +15,9 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, onAddToCart, onQuickView }: ProductCardProps) {
+  const [selectedVariant, setSelectedVariant] = useState(
+    product.variants?.[0] || null
+  );
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -32,10 +35,10 @@ export default function ProductCard({ product, onAddToCart, onQuickView }: Produ
           className="w-full h-full object-cover transform scale-100 group-hover:scale-105 transition-transform duration-1000 ease-out"
           referrerPolicy="no-referrer"
         />
-        
+
         {/* Dark subtle overlay for contrast */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        
+
         {/* Category Badge */}
         <div className="absolute top-4 left-4 bg-brand-ivory/95 backdrop-blur-xs text-brand-green text-[9px] font-bold uppercase tracking-[0.2em] px-3 py-1.5 border border-brand-green/10">
           {product.category}
@@ -43,7 +46,7 @@ export default function ProductCard({ product, onAddToCart, onQuickView }: Produ
 
         {/* Quick View Interactive Button Overlay */}
         <div className="absolute inset-0 flex items-center justify-center space-x-2 opacity-0 group-hover:opacity-100 transition-all duration-300 scale-95 group-hover:scale-100">
-          
+
         </div>
       </div>
 
@@ -54,24 +57,53 @@ export default function ProductCard({ product, onAddToCart, onQuickView }: Produ
             {product.name}
           </h3>
         </div>
-        
+
         <p className="font-sans text-xs text-brand-green/70 mb-6 line-clamp-3 leading-relaxed font-light flex-grow">
           {product.description || 'Une délicieuse création artisanale préparée à la commande avec des ingrédients frais.'}
         </p>
+        {product.variants && product.variants.length > 0 && (
+          <div className="mb-4">
+            <p className="text-xs font-semibold mb-2">
+              Choisir la taille
+            </p>
 
+            <div className="flex gap-2 flex-wrap">
+              {product.variants.map((variant) => (
+                <button
+                  key={variant.id}
+                  type="button"
+                  onClick={() => setSelectedVariant(variant)}
+                  className={`px-3 py-1 border rounded text-xs ${selectedVariant?.id === variant.id
+                    ? "bg-brand-green text-white"
+                    : "bg-white"
+                    }`}
+                >
+                  {variant.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         {/* Bottom Actions Row */}
         <div className="flex items-center justify-between pt-4 border-t border-brand-green/10 mt-auto">
           <div>
             <span className="font-serif text-lg font-bold text-brand-green">
-              {product.price.toLocaleString('en-US', { style: 'currency', currency: 'DZD' })}
+              {(
+                selectedVariant?.price ||
+                product.price
+              ).toLocaleString()} DZD
             </span>
             <span className="font-sans text-[10px] font-bold text-brand-gold ml-1 tracking-wider">DZD</span>
           </div>
 
           <motion.button
             whileTap={{ scale: 0.97 }}
-            onClick={() => onAddToCart(product)}
-            className="px-5 py-2 bg-brand-green hover:bg-brand-gold text-brand-ivory hover:text-brand-green text-xs font-semibold uppercase tracking-[0.15em] transition-all duration-300 border border-brand-green/20 hover:border-brand-gold/30 cursor-pointer"
+            onClick={() =>
+              onAddToCart({
+                ...product,
+                selectedVariant
+              })
+            } className="px-5 py-2 bg-brand-green hover:bg-brand-gold text-brand-ivory hover:text-brand-green text-xs font-semibold uppercase tracking-[0.15em] transition-all duration-300 border border-brand-green/20 hover:border-brand-gold/30 cursor-pointer"
           >
             Ajouter
           </motion.button>

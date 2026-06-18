@@ -352,6 +352,7 @@ export default function AdminProducts({
                 className="w-full bg-brand-green/5 border border-brand-green/10 rounded-xl py-3 px-4 text-brand-green placeholder-brand-green/30 outline-none focus:ring-1 focus:ring-brand-gold focus:border-brand-gold transition-all"
               />
             </div>
+            {category === "Tacos" && (
             <div className="space-y-3 border-t border-brand-green/10 pt-4">
               <label className="font-bold text-brand-green">
                 Tailles
@@ -401,6 +402,7 @@ export default function AdminProducts({
                 + Ajouter Taille
               </button>
             </div>
+            )}
             <div className="space-y-3">
               <label className="font-bold text-brand-green">
                 Options

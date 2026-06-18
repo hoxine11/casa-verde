@@ -160,8 +160,8 @@ export const updateProduct = async (req, res) => {
 };
 export const getProducts = async (req, res) => {
   try {
-    const result = await pool.query(`
-      SELECT
+   const result = await pool.query(`
+SELECT
   p.id,
   p.name,
   p.description,
@@ -169,12 +169,23 @@ export const getProducts = async (req, res) => {
   p.price,
   p.is_active,
   p.category_id,
-  c.name AS category
+  c.name AS category,
+
+  COALESCE(
+    (
+      SELECT json_agg(v)
+      FROM product_variants v
+      WHERE v.product_id = p.id
+    ),
+    '[]'
+  ) AS variants
+
 FROM products p
 LEFT JOIN categories c
 ON c.id = p.category_id
+
 ORDER BY p.id DESC
-    `);
+`);
 
     res.status(200).json(result.rows);
   } catch (error) {
