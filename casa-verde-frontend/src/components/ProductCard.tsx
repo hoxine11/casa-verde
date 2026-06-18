@@ -18,6 +18,7 @@ export default function ProductCard({ product, onAddToCart, onQuickView }: Produ
   const [selectedVariant, setSelectedVariant] = useState(
     product.variants?.[0] || null
   );
+  console.log(product);
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}

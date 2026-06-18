@@ -28,17 +28,21 @@ export default function AdminProducts({
   const [category, setCategory] = useState('');
   const [image, setImage] = useState('');
   const [isActive, setIsActive] = useState(true);
-  const [variants, setVariants] = useState([
+  const [variants, setVariants] = useState<
+    { name: string; price: number }[]
+  >([
     {
       name: "",
-      price: ""
+      price: 0
     }
   ]);
 
-  const [options, setOptions] = useState([
+  const [options, setOptions] = useState<
+    { name: string; price: number }[]
+  >([
     {
       name: "",
-      price: ""
+      price: 0
     }
   ]);
   // Photo taking & uploading state
@@ -137,6 +141,8 @@ export default function AdminProducts({
     setCategory(product.category);
     setImage(product.image_url);
     setIsActive(product.is_active);
+    setVariants(product.variants || []);
+    setOptions(product.options || []);
     setIsEditing(true);
     if (product.image_url && (product.image_url.startsWith('http') || product.image_url.startsWith('/'))) {
       setUploadSource('url');
@@ -168,7 +174,12 @@ export default function AdminProducts({
 
       formData.append("name", name);
       formData.append("description", description);
-      formData.append("price", String(price));
+      formData.append(
+        "price",
+        category.toLowerCase() === "tacos"
+          ? "0"
+          : String(price)
+      );
       console.log("CATEGORY =", selectedCategory);
       console.log("CATEGORY ID =", selectedCategory?.id);
       formData.append(
@@ -197,13 +208,20 @@ export default function AdminProducts({
       }
 
       if (editProduct) {
-        await fetch(
+
+        const res = await fetch(
           `https://casa-verde-production-1d5f.up.railway.app/api/products/${editProduct.id}`,
           {
             method: "PUT",
             body: formData
           }
         );
+
+        const data = await res.json();
+
+        console.log("PUT STATUS =", res.status);
+        console.log("PUT RESPONSE =", data);
+
       } else {
         await fetch(
           "https://casa-verde-production-1d5f.up.railway.app/api/products",
@@ -277,18 +295,28 @@ export default function AdminProducts({
               </div>
 
               {/* Price field */}
-              <div className="space-y-2">
-                <label className="text-brand-green block">Prix (DZD) *</label>
-                <input
-                  type="number"
-                  required
-                  min="0"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value === '' ? '' : Number(e.target.value))}
-                  placeholder="ex: 750"
-                  className="w-full bg-brand-green/5 border border-brand-green/10 rounded-xl py-3 px-4 text-brand-green placeholder-brand-green/30 outline-none focus:ring-1 focus:ring-brand-gold focus:border-brand-gold transition-all"
-                />
-              </div>
+
+              {category.toLowerCase() !== "tacos" && (
+                <div className="space-y-2">
+                  <label className="text-brand-green block">
+                    Prix (DZD)
+                  </label>
+
+                  <input
+                    type="number"
+                    min="0"
+                    value={price}
+                    onChange={(e) =>
+                      setPrice(
+                        e.target.value === ""
+                          ? ""
+                          : Number(e.target.value)
+                      )
+                    }
+                    className="w-full bg-brand-green/5 border border-brand-green/10 rounded-xl py-3 px-4"
+                  />
+                </div>
+              )}
 
             </div>
 
@@ -353,105 +381,107 @@ export default function AdminProducts({
               />
             </div>
             {category === "Tacos" && (
-            <div className="space-y-3 border-t border-brand-green/10 pt-4">
-              <label className="font-bold text-brand-green">
-                Tailles
-              </label>
+              <div className="space-y-3 border-t border-brand-green/10 pt-4">
+                <label className="font-bold text-brand-green">
+                  Tailles
+                </label>
 
-              {variants.map((variant, index) => (
-                <div
-                  key={index}
-                  className="flex gap-3"
+                {variants.map((variant, index) => (
+                  <div
+                    key={index}
+                    className="flex gap-3"
+                  >
+                    <input
+                      type="text"
+                      placeholder="M"
+                      value={variant.name}
+                      onChange={(e) => {
+                        const copy = [...variants];
+                        copy[index].name = e.target.value;
+                        setVariants(copy);
+                      }}
+                      className="border rounded p-2 flex-1"
+                    />
+
+                    <input
+                      type="number"
+                      placeholder="500"
+                      value={variant.price}
+                      onChange={(e) => {
+                        const copy = [...variants];
+                        copy[index].price = Number(e.target.value);
+                        setVariants(copy);
+                      }}
+                      className="border rounded p-2 flex-1"
+                    />
+                  </div>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setVariants([
+                      ...variants,
+                      { name: "", price: 0 }
+                    ])
+                  }
+                  className="text-sm text-blue-600"
                 >
-                  <input
-                    type="text"
-                    placeholder="M"
-                    value={variant.name}
-                    onChange={(e) => {
-                      const copy = [...variants];
-                      copy[index].name = e.target.value;
-                      setVariants(copy);
-                    }}
-                    className="border rounded p-2 flex-1"
-                  />
-
-                  <input
-                    type="number"
-                    placeholder="500"
-                    value={variant.price}
-                    onChange={(e) => {
-                      const copy = [...variants];
-                      copy[index].price = e.target.value;
-                      setVariants(copy);
-                    }}
-                    className="border rounded p-2 flex-1"
-                  />
-                </div>
-              ))}
-
-              <button
-                type="button"
-                onClick={() =>
-                  setVariants([
-                    ...variants,
-                    { name: "", price: "" }
-                  ])
-                }
-                className="text-sm text-blue-600"
-              >
-                + Ajouter Taille
-              </button>
-            </div>
+                  + Ajouter Taille
+                </button>
+              </div>
             )}
-            <div className="space-y-3">
-              <label className="font-bold text-brand-green">
-                Options
-              </label>
+            {category.toLowerCase() !== "tacos" && (
+              <div className="space-y-3">
+                <label className="font-bold text-brand-green">
+                  Options
+                </label>
 
-              {options.map((option, index) => (
-                <div
-                  key={index}
-                  className="flex gap-3"
+                {options.map((option, index) => (
+                  <div
+                    key={index}
+                    className="flex gap-3"
+                  >
+                    <input
+                      type="text"
+                      placeholder="Camembert"
+                      value={option.name}
+                      onChange={(e) => {
+                        const copy = [...options];
+                        copy[index].name = e.target.value;
+                        setOptions(copy);
+                      }}
+                      className="border rounded p-2 flex-1"
+                    />
+
+                    <input
+                      type="number"
+                      placeholder="100"
+                      value={option.price}
+                      onChange={(e) => {
+                        const copy = [...options];
+                        copy[index].price = Number(e.target.value);
+                        setOptions(copy);
+                      }}
+                      className="border rounded p-2 flex-1"
+                    />
+                  </div>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setOptions([
+                      ...options,
+                      { name: "", price: 0 }
+                    ])
+                  }
+                  className="text-sm text-blue-600"
                 >
-                  <input
-                    type="text"
-                    placeholder="Camembert"
-                    value={option.name}
-                    onChange={(e) => {
-                      const copy = [...options];
-                      copy[index].name = e.target.value;
-                      setOptions(copy);
-                    }}
-                    className="border rounded p-2 flex-1"
-                  />
-
-                  <input
-                    type="number"
-                    placeholder="100"
-                    value={option.price}
-                    onChange={(e) => {
-                      const copy = [...options];
-                      copy[index].price = e.target.value;
-                      setOptions(copy);
-                    }}
-                    className="border rounded p-2 flex-1"
-                  />
-                </div>
-              ))}
-
-              <button
-                type="button"
-                onClick={() =>
-                  setOptions([
-                    ...options,
-                    { name: "", price: "" }
-                  ])
-                }
-                className="text-sm text-blue-600"
-              >
-                + Ajouter Option
-              </button>
-            </div>
+                  + Ajouter Option
+                </button>
+              </div>
+            )}
             {/* Image Upload/Capture Panel */}
             <div className="space-y-3 pt-3 border-t border-brand-green/10">
               <label className="text-brand-green font-bold block text-xs">Visuel du produit (Photo ou Image)</label>
@@ -630,108 +660,85 @@ export default function AdminProducts({
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {products.map((product) => (
-                <div
-                  key={product.id}
-                  className="bg-brand-ivory rounded-2xl overflow-hidden shadow-sm border border-brand-green/10 flex flex-col justify-between"
-                >
-                  {/* Aspect image frame */}
-                  <div className="relative aspect-4/3 overflow-hidden bg-brand-green/5">
-                    <img
-                      src={product.image_url || 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=600&auto=format&fit=crop'}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                      referrerPolicy="no-referrer"
-                    />
+              {products.map((product) => {
+                const minPrice =
+                  product.variants && product.variants.length > 0
+                    ? Math.min(
+                      ...product.variants.map(v =>
+                        Number(v.price)
+                      )
+                    )
+                    : Number(product.price);
+                return (
+                  <div
+                    key={product.id}
+                    className="bg-brand-ivory rounded-2xl overflow-hidden shadow-sm border border-brand-green/10 flex flex-col justify-between"
+                  >
+                    {/* Aspect image frame */}
+                    <div className="relative aspect-4/3 overflow-hidden bg-brand-green/5">
+                      <img
+                        src={product.image_url || 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=600&auto=format&fit=crop'}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                        referrerPolicy="no-referrer"
+                      />
 
-                    {/* Active Inactive Badge overlay */}
-                    <div className="absolute top-3 left-3 select-none">
-                      {product.is_active ? (
-                        <span className="bg-emerald-100 text-emerald-800 text-[9px] font-bold tracking-widest uppercase px-2.5 py-1 rounded-full border border-emerald-300">
-                          Actif
-                        </span>
-                      ) : (
-                        <span className="bg-brand-green/60 text-brand-ivory text-[9px] font-bold tracking-widest uppercase px-2.5 py-1 rounded-full border border-brand-green/30">
-                          Inactif
-                        </span>
-                      )}
+                      {/* Active Inactive Badge overlay */}
+                      <div className="absolute top-3 left-3 select-none">
+                        {product.is_active ? (
+                          <span className="bg-emerald-100 text-emerald-800 text-[9px] font-bold tracking-widest uppercase px-2.5 py-1 rounded-full border border-emerald-300">
+                            Actif
+                          </span>
+                        ) : (
+                          <span className="bg-brand-green/60 text-brand-ivory text-[9px] font-bold tracking-widest uppercase px-2.5 py-1 rounded-full border border-brand-green/30">
+                            Inactif
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="absolute top-3 right-3 bg-brand-green/95 backdrop-blur-md text-brand-gold text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border border-brand-gold/30">
+                        {product.category}
+                      </div>
                     </div>
 
-                    <div className="absolute top-3 right-3 bg-brand-green/95 backdrop-blur-md text-brand-gold text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border border-brand-gold/30">
-                      {product.category}
+                    {/* Body elements */}
+                    <div className="p-5 flex-grow">
+                      <h3 className="font-serif text-base font-bold text-brand-green leading-snug">
+                        {product.name}
+                      </h3>
+                      <p className="font-sans text-[11px] text-brand-green/60 mt-1 line-clamp-2 leading-relaxed font-light">
+                        {product.description || 'Création culinaire préparée à la commande.'}
+                      </p>
+                      <p className="font-serif text-lg font-bold text-brand-green mt-4">
+                        {minPrice.toLocaleString()}{' '}
+                        <span className="font-sans text-xs font-semibold text-brand-gold">DZD</span>
+                      </p>
                     </div>
-                  </div>
 
-                  {/* Body elements */}
-                  <div className="p-5 flex-grow">
-                    <h3 className="font-serif text-base font-bold text-brand-green leading-snug">
-                      {product.name}
-                    </h3>
-                    <p className="font-sans text-[11px] text-brand-green/60 mt-1 line-clamp-2 leading-relaxed font-light">
-                      {product.description || 'Création culinaire préparée à la commande.'}
-                    </p>
-                    <p className="font-serif text-lg font-bold text-brand-green mt-4">
-                      {product.price.toLocaleString()}{' '}
-                      <span className="font-sans text-xs font-semibold text-brand-gold">DZD</span>
-                    </p>
-                  </div>
-
-                  {/* Quick toggle list actions Footer */}
-                  <div className="px-5 py-3.5 bg-brand-green/5 border-t border-brand-green/10 flex items-center justify-between">
-                    {/* Active toggle */}
-                    <button
-                      onClick={async () => {
-                        try {
-                          const categoryObj = categories.find(
-                            (c) => c.name === product.category
-                          );
-
-                          await fetch(
-                            `https://casa-verde-production-1d5f.up.railway.app/api/products/${product.id}`,
-                            {
-                              method: "PUT",
-                              headers: {
-                                "Content-Type": "application/json"
-                              },
-                              body: JSON.stringify({
-                                name: product.name,
-                                description: product.description,
-                                price: product.price,
-                                category_id: categoryObj?.id,
-                                is_active: !product.is_active
-                              })
-                            }
-                          );
-
-                          await refreshProducts();
-
-                        } catch (error) {
-                          console.error(error);
-                        }
-                      }}
-                      className="px-3 py-1 rounded-full border border-brand-green/20 hover:border-brand-green bg-white text-brand-green text-[10px] font-semibold transition-all cursor-pointer"
-                    >
-                      {product.is_active ? 'Désactiver' : 'Activer'}
-                    </button>
-
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => startEdit(product)}
-                        className="p-1.5 border border-brand-green/10 hover:border-brand-green text-brand-green rounded-full bg-white hover:text-brand-green transition-all cursor-pointer"
-                        title="Modifier"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
+                    {/* Quick toggle list actions Footer */}
+                    <div className="px-5 py-3.5 bg-brand-green/5 border-t border-brand-green/10 flex items-center justify-between">
+                      {/* Active toggle */}
                       <button
                         onClick={async () => {
-                          if (!confirm('Supprimer définitivement ce produit ?'))
-                            return;
-
                           try {
+                            const categoryObj = categories.find(
+                              (c) => c.name === product.category
+                            );
+
                             await fetch(
                               `https://casa-verde-production-1d5f.up.railway.app/api/products/${product.id}`,
                               {
-                                method: "DELETE"
+                                method: "PUT",
+                                headers: {
+                                  "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({
+                                  name: product.name,
+                                  description: product.description,
+                                  price: product.price,
+                                  category_id: categoryObj?.id,
+                                  is_active: !product.is_active
+                                })
                               }
                             );
 
@@ -739,19 +746,52 @@ export default function AdminProducts({
 
                           } catch (error) {
                             console.error(error);
-                            alert("Erreur lors de la suppression");
                           }
                         }}
-                        className="p-1.5 border border-rose-100 text-rose-600 rounded-full bg-rose-50 hover:bg-rose-500 hover:text-white transition-all cursor-pointer"
-                        title="Supprimer"
+                        className="px-3 py-1 rounded-full border border-brand-green/20 hover:border-brand-green bg-white text-brand-green text-[10px] font-semibold transition-all cursor-pointer"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        {product.is_active ? 'Désactiver' : 'Activer'}
                       </button>
-                    </div>
-                  </div>
 
-                </div>
-              ))}
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => startEdit(product)}
+                          className="p-1.5 border border-brand-green/10 hover:border-brand-green text-brand-green rounded-full bg-white hover:text-brand-green transition-all cursor-pointer"
+                          title="Modifier"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={async () => {
+                            if (!confirm('Supprimer définitivement ce produit ?'))
+                              return;
+
+                            try {
+                              await fetch(
+                                `https://casa-verde-production-1d5f.up.railway.app/api/products/${product.id}`,
+                                {
+                                  method: "DELETE"
+                                }
+                              );
+
+                              await refreshProducts();
+
+                            } catch (error) {
+                              console.error(error);
+                              alert("Erreur lors de la suppression");
+                            }
+                          }}
+                          className="p-1.5 border border-rose-100 text-rose-600 rounded-full bg-rose-50 hover:bg-rose-500 hover:text-white transition-all cursor-pointer"
+                          title="Supprimer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
+                  </div>
+                )
+              })}
             </div>
           )}
         </div>

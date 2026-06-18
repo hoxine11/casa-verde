@@ -268,7 +268,16 @@ export default function App() {
   }, [cart]);
 
   const cartSubtotal = useMemo(() => {
-    return cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+    return cart.reduce(
+      (sum, item) =>
+        sum +
+        (
+          item.product.selectedVariant?.price ||
+          item.product.price
+        ) *
+        item.quantity,
+      0
+    );
   }, [cart]);
 
   const cartTotal = useMemo(() => {
@@ -331,7 +340,11 @@ export default function App() {
 
         items: cart.map((item) => ({
           productId: item.product.id,
-          price: item.product.price,
+
+          price:
+            item.product.selectedVariant?.price ||
+            item.product.price,
+
           quantity: item.quantity,
 
           variantName:
@@ -339,7 +352,7 @@ export default function App() {
 
           optionName:
             item.product.selectedOption?.name || null,
-        })),
+        }))
       };
 
       await fetch(
@@ -1011,7 +1024,10 @@ export default function App() {
                               </p>
                             )}
                             <p className="font-serif text-sm font-semibold text-brand-green/90 mt-1">
-                              {item.product.price.toLocaleString()} DZD
+                              {(
+                                item.product.selectedVariant?.price ||
+                                item.product.price
+                              ).toLocaleString()} DZD
                             </p>
                           </div>
                         </div>
@@ -1197,7 +1213,12 @@ export default function App() {
                             {item.quantity}× <strong className="text-brand-green-dark">{item.product.name}</strong>
                           </span>
                           <span className="font-bold">
-                            {(item.product.price * item.quantity).toLocaleString()} DZD
+                            {(
+                              (
+                                item.product.selectedVariant?.price ||
+                                item.product.price
+                              ) * item.quantity
+                            ).toLocaleString()} DZD
                           </span>
                         </li>
                       ))}

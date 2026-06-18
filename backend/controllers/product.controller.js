@@ -134,9 +134,23 @@ export const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const { name, description, price, category_id, is_active } = req.body;
+    const {
+      name,
+      description,
+      price,
+      category_id,
+      is_active
+    } = req.body;
 
-    const result = await pool.query(
+    const variants = JSON.parse(
+      req.body.variants || "[]"
+    );
+
+    const options = JSON.parse(
+      req.body.options || "[]"
+    );
+
+    await pool.query(
       `
       UPDATE products
       SET
@@ -146,15 +160,88 @@ export const updateProduct = async (req, res) => {
         category_id = $4,
         is_active = $5
       WHERE id = $6
-      RETURNING *
       `,
-      [name, description, price, category_id, is_active, id],
+      [
+        name,
+        description,
+        price,
+        category_id,
+        is_active === "true",
+        id
+      ]
     );
 
-    return res.json(result.rows[0]);
+    // حذف الأحجام القديمة
+    await pool.query(
+      `
+      DELETE FROM product_variants
+      WHERE product_id = $1
+      `,
+      [id]
+    );
+
+    // إعادة إدخال الأحجام الجديدة
+    for (const variant of variants) {
+      if (!variant.name) continue;
+
+      await pool.query(
+        `
+        INSERT INTO product_variants
+        (
+          product_id,
+          name,
+          price
+        )
+        VALUES ($1,$2,$3)
+        `,
+        [
+          id,
+          variant.name,
+          variant.price || 0
+        ]
+      );
+    }
+
+    // حذف الخيارات القديمة
+    await pool.query(
+      `
+      DELETE FROM product_options
+      WHERE product_id = $1
+      `,
+      [id]
+    );
+
+    // إعادة إدخال الخيارات الجديدة
+    for (const option of options) {
+      if (!option.name) continue;
+
+      await pool.query(
+        `
+        INSERT INTO product_options
+        (
+          product_id,
+          name,
+          price
+        )
+        VALUES ($1,$2,$3)
+        `,
+        [
+          id,
+          option.name,
+          option.price || 0
+        ]
+      );
+    }
+
+    return res.json({
+      message: "Produit modifié avec succès"
+    });
+
   } catch (error) {
+    console.error(error);
+
     return res.status(500).json({
-      error: error.message,
+      error: error.message
     });
   }
 };
