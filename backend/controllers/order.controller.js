@@ -82,8 +82,9 @@ export const createOrder = async (req, res) => {
 
     // Création order items
     // Création order items
+    console.log("ITEMS =", JSON.stringify(items, null, 2));
     for (const item of items) {
-      console.log("ITEM =", item);
+      console.log("INSERTING =", item);
 
       await pool.query(
         `
@@ -93,16 +94,18 @@ export const createOrder = async (req, res) => {
       product_id,
       quantity,
       unit_price,
+      total_price,
       variant_name,
       option_name
     )
-    VALUES ($1,$2,$3,$4,$5,$6)
+    VALUES ($1,$2,$3,$4,$5,$6,$7)
     `,
         [
           order.id,
           item.productId,
           item.quantity,
           item.price,
+          item.price * item.quantity,
           item.variantName,
           item.optionName,
         ],
