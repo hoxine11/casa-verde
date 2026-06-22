@@ -3,29 +3,18 @@ import cloudinary from "../config/cloudinary.js";
 
 export const createProduct = async (req, res) => {
   try {
-    const {
-      name,
-      description,
-      price,
-      category_id,
-      is_active
-    } = req.body;
+    const { name, description, price, category_id, is_active } = req.body;
 
-    const variants = JSON.parse(
-      req.body.variants || "[]"
-    );
+    const variants = JSON.parse(req.body.variants || "[]");
 
-    const options = JSON.parse(
-      req.body.options || "[]"
-    );
+    const options = JSON.parse(req.body.options || "[]");
+    const crepeSteps = JSON.parse(req.body.crepeSteps || "[]");
 
+    const crepeFormulas = JSON.parse(req.body.crepeFormulas || "[]");
     let imageUrl = null;
 
     if (req.file) {
-      const resultImage =
-        await cloudinary.uploader.upload(
-          req.file.path
-        );
+      const resultImage = await cloudinary.uploader.upload(req.file.path);
 
       imageUrl = resultImage.secure_url;
     }
@@ -45,14 +34,7 @@ export const createProduct = async (req, res) => {
       ($1,$2,$3,$4,$5,$6)
       RETURNING *
       `,
-      [
-        name,
-        description,
-        imageUrl,
-        price,
-        category_id,
-        is_active === "true",
-      ]
+      [name, description, imageUrl, price, category_id, is_active === "true"],
     );
 
     const product = productResult.rows[0];
@@ -71,11 +53,7 @@ export const createProduct = async (req, res) => {
         )
         VALUES ($1,$2,$3)
         `,
-        [
-          product.id,
-          variant.name,
-          variant.price || 0
-        ]
+        [product.id, variant.name, variant.price || 0],
       );
     }
 
@@ -93,24 +71,51 @@ export const createProduct = async (req, res) => {
         )
         VALUES ($1,$2,$3)
         `,
-        [
-          product.id,
-          option.name,
-          option.price || 0
-        ]
+        [product.id, option.name, option.price || 0],
       );
     }
+    for (const step of crepeSteps) {
+      if (!step.name) continue;
 
+      await pool.query(
+        `
+    INSERT INTO crepe_step_items
+    (
+      product_id,
+      step_number,
+      name,
+      price
+    )
+    VALUES ($1,$2,$3,$4)
+    `,
+        [product.id, step.step_number, step.name, step.price || 0],
+      );
+    }
+    for (const formula of crepeFormulas) {
+      if (!formula.name) continue;
+
+      await pool.query(
+        `
+    INSERT INTO crepe_formulas
+    (
+      product_id,
+      name,
+      price
+    )
+    VALUES ($1,$2,$3)
+    `,
+        [product.id, formula.name, formula.price || 0],
+      );
+    }
     return res.status(201).json({
       message: "Produit créé avec succès",
-      product
+      product,
     });
-
   } catch (error) {
     console.log(error);
 
     return res.status(500).json({
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -134,21 +139,14 @@ export const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const {
-      name,
-      description,
-      price,
-      category_id,
-      is_active
-    } = req.body;
+    const { name, description, price, category_id, is_active } = req.body;
 
-    const variants = JSON.parse(
-      req.body.variants || "[]"
-    );
+    const variants = JSON.parse(req.body.variants || "[]");
 
-    const options = JSON.parse(
-      req.body.options || "[]"
-    );
+    const options = JSON.parse(req.body.options || "[]");
+    const crepeSteps = JSON.parse(req.body.crepeSteps || "[]");
+
+    const crepeFormulas = JSON.parse(req.body.crepeFormulas || "[]");
 
     await pool.query(
       `
@@ -161,14 +159,7 @@ export const updateProduct = async (req, res) => {
         is_active = $5
       WHERE id = $6
       `,
-      [
-        name,
-        description,
-        price,
-        category_id,
-        is_active === "true",
-        id
-      ]
+      [name, description, price, category_id, is_active === "true", id],
     );
 
     // حذف الأحجام القديمة
@@ -177,7 +168,7 @@ export const updateProduct = async (req, res) => {
       DELETE FROM product_variants
       WHERE product_id = $1
       `,
-      [id]
+      [id],
     );
 
     // إعادة إدخال الأحجام الجديدة
@@ -194,11 +185,7 @@ export const updateProduct = async (req, res) => {
         )
         VALUES ($1,$2,$3)
         `,
-        [
-          id,
-          variant.name,
-          variant.price || 0
-        ]
+        [id, variant.name, variant.price || 0],
       );
     }
 
@@ -208,7 +195,7 @@ export const updateProduct = async (req, res) => {
       DELETE FROM product_options
       WHERE product_id = $1
       `,
-      [id]
+      [id],
     );
 
     // إعادة إدخال الخيارات الجديدة
@@ -225,29 +212,24 @@ export const updateProduct = async (req, res) => {
         )
         VALUES ($1,$2,$3)
         `,
-        [
-          id,
-          option.name,
-          option.price || 0
-        ]
+        [id, option.name, option.price || 0],
       );
     }
 
     return res.json({
-      message: "Produit modifié avec succès"
+      message: "Produit modifié avec succès",
     });
-
   } catch (error) {
     console.error(error);
 
     return res.status(500).json({
-      error: error.message
+      error: error.message,
     });
   }
 };
 export const getProducts = async (req, res) => {
   try {
-   const result = await pool.query(`
+    const result = await pool.query(`
 SELECT
   p.id,
   p.name,
@@ -266,7 +248,26 @@ SELECT
     ),
     '[]'
   ) AS variants,
+   
+COALESCE(
+(
+  SELECT json_agg(s)
+  FROM crepe_step_items s
+  WHERE s.product_id = p.id
+),
+'[]'
+) AS "crepeSteps"
 
+,
+COALESCE(
+(
+  SELECT json_agg(f)
+  FROM crepe_formulas f
+  WHERE f.product_id = p.id
+),
+'[]'
+) AS "crepeFormulas"
+,
   COALESCE(
     (
       SELECT json_agg(o)
@@ -285,11 +286,11 @@ ORDER BY p.id DESC
 
     res.status(200).json(result.rows);
   } catch (error) {
-  console.error(error);
+    console.error(error);
 
-  res.status(500).json({
-    error: error.message,
-    detail: error
-  });
-}
+    res.status(500).json({
+      error: error.message,
+      detail: error,
+    });
+  }
 };
