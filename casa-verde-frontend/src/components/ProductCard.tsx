@@ -4,6 +4,7 @@
  */
 
 import { Plus, Eye } from 'lucide-react';
+import {ProductOption } from '../types';
 import { motion } from 'motion/react';
 import { Product } from '../types';
 import { useState } from 'react';
@@ -18,6 +19,11 @@ export default function ProductCard({ product, onAddToCart, onQuickView }: Produ
   const [selectedVariant, setSelectedVariant] = useState(
     product.variants?.[0] || null
   );
+const [selectedOption, setSelectedOption] =
+  useState<ProductOption | null>(null);
+  const finalPrice =
+    Number(selectedVariant?.price || product.price) +
+    Number(selectedOption?.price || 0);
   console.log(product);
   return (
     <motion.div
@@ -59,10 +65,11 @@ export default function ProductCard({ product, onAddToCart, onQuickView }: Produ
           </h3>
         </div>
 
-        <p className="font-sans text-xs text-brand-green/70 mb-6 line-clamp-3 leading-relaxed font-light flex-grow">
+        {/* <p className="font-sans text-xs text-brand-green/70 mb-6 line-clamp-3 leading-relaxed font-light flex-grow">
           {product.description || 'Une délicieuse création artisanale préparée à la commande avec des ingrédients frais.'}
-        </p>
+        </p> */}
         {product.variants && product.variants.length > 0 && (
+
           <div className="mb-4">
             <p className="text-xs font-semibold mb-2">
               Choisir la taille
@@ -85,14 +92,39 @@ export default function ProductCard({ product, onAddToCart, onQuickView }: Produ
             </div>
           </div>
         )}
+        {product.options && product.options.length > 0 && (
+          <div className="mb-4">
+            <p className="text-xs font-semibold mb-2">
+              Choisir une option
+            </p>
+
+            <div className="flex gap-2 flex-wrap">
+
+              <button
+                type="button"
+                onClick={() => setSelectedOption(null)}
+              >
+                Aucune
+              </button>
+
+              {product.options.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => setSelectedOption(option)}
+                >
+                  {option.name}
+                  (+{option.price} DZD)
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         {/* Bottom Actions Row */}
         <div className="flex items-center justify-between pt-4 border-t border-brand-green/10 mt-auto">
           <div>
             <span className="font-serif text-lg font-bold text-brand-green">
-              {(
-                selectedVariant?.price ||
-                product.price
-              ).toLocaleString()} DZD
+              {finalPrice.toLocaleString()} DZD
             </span>
             <span className="font-sans text-[10px] font-bold text-brand-gold ml-1 tracking-wider">DZD</span>
           </div>
@@ -102,7 +134,8 @@ export default function ProductCard({ product, onAddToCart, onQuickView }: Produ
             onClick={() =>
               onAddToCart({
                 ...product,
-                selectedVariant
+                selectedVariant,
+                selectedOption
               })
             } className="px-5 py-2 bg-brand-green hover:bg-brand-gold text-brand-ivory hover:text-brand-green text-xs font-semibold uppercase tracking-[0.15em] transition-all duration-300 border border-brand-green/20 hover:border-brand-gold/30 cursor-pointer"
           >
