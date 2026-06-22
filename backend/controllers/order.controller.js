@@ -146,39 +146,38 @@ export const getOrders = async (req, res) => {
 
     const orders = ordersResult.rows;
 
-    for (const order of orders) {
-      const itemsResult = await pool.query(
-        `
-  SELECT
-    oi.id,
-    oi.product_id,
-    oi.quantity,
-    oi.unit_price,
-    oi.variant_name,
-    oi.option_name,
+   console.log("ITEMS RECEIVED =", items);
 
-    p.name
+if (items && items.length > 0) {
+  for (const item of items) {
+    console.log("INSERT ITEM =", item);
 
-  FROM order_items oi
-  LEFT JOIN products p
-  ON p.id = oi.product_id
-
-  WHERE oi.order_id = $1
-  `,
-        [order.id],
-      );
-
-      order.items = itemsResult.rows.map((item) => ({
-        id: item.id,
-        productId: item.product_id,
-        name: item.name,
-        price: Number(item.unit_price),
-        quantity: item.quantity,
-
-        variant_name: item.variant_name,
-        option_name: item.option_name,
-      }));
-    }
+    await pool.query(
+      `
+      INSERT INTO order_items
+      (
+        order_id,
+        product_id,
+        quantity,
+        unit_price,
+        total_price,
+        variant_name,
+        option_name
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7)
+      `,
+      [
+        order.id,
+        item.productId,
+        item.quantity,
+        item.price,
+        item.price * item.quantity,
+        item.variantName,
+        item.optionName,
+      ]
+    );
+  }
+}
 
     return res.json(orders);
   } catch (error) {
