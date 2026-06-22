@@ -706,13 +706,48 @@ export default function AdminProducts({
                       <h3 className="font-serif text-base font-bold text-brand-green leading-snug">
                         {product.name}
                       </h3>
+
                       <p className="font-sans text-[11px] text-brand-green/60 mt-1 line-clamp-2 leading-relaxed font-light">
-                        {product.description || 'Création culinaire préparée à la commande.'}
+                        {product.description ||
+                          "Création culinaire préparée à la commande."}
                       </p>
+
                       <p className="font-serif text-lg font-bold text-brand-green mt-4">
-                        {minPrice.toLocaleString()}{' '}
-                        <span className="font-sans text-xs font-semibold text-brand-gold">DZD</span>
+                        {minPrice.toLocaleString()}
+                        <span className="ml-1 text-xs text-brand-gold">
+                          DZD
+                        </span>
                       </p>
+
+                      {/* Variants */}
+                      {product.variants &&
+                        product.variants.length > 0 && (
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {product.variants.map((variant) => (
+                              <span
+                                key={variant.id}
+                                className="px-2 py-1 rounded-full bg-brand-green/10 text-brand-green text-[10px]"
+                              >
+                                {variant.name} • {variant.price} DZD
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                      {/* Options */}
+                      {product.options &&
+                        product.options.length > 0 && (
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {product.options.map((option) => (
+                              <span
+                                key={option.id}
+                                className="px-2 py-1 rounded-full bg-brand-gold/10 text-brand-green text-[10px]"
+                              >
+                                + {option.name} ({option.price} DZD)
+                              </span>
+                            ))}
+                          </div>
+                        )}
                     </div>
 
                     {/* Quick toggle list actions Footer */}

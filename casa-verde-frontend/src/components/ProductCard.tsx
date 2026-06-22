@@ -100,24 +100,36 @@ const [selectedOption, setSelectedOption] =
 
             <div className="flex gap-2 flex-wrap">
 
-              <button
-                type="button"
-                onClick={() => setSelectedOption(null)}
-              >
-                Aucune
-              </button>
+  <button
+    type="button"
+    onClick={() => setSelectedOption(null)}
+    className={`px-3 py-1 border rounded text-xs ${
+      selectedOption === null
+        ? "bg-brand-green text-white"
+        : "bg-white"
+    }`}
+  >
+    Aucune
+  </button>
 
-              {product.options.map((option) => (
-                <button
-                  key={option.id}
-                  type="button"
-                  onClick={() => setSelectedOption(option)}
-                >
-                  {option.name}
-                  (+{option.price} DZD)
-                </button>
-              ))}
-            </div>
+  {product.options.map((option) => (
+    <button
+      key={option.id}
+      type="button"
+      onClick={() => setSelectedOption(option)}
+      className={`px-3 py-1 border rounded text-xs ${
+        selectedOption?.id === option.id
+          ? "bg-brand-green text-white"
+          : "bg-white"
+      }`}
+    >
+      {option.name}
+      <span className="ml-1 text-[10px]">
+        +{option.price}
+      </span>
+    </button>
+  ))}
+</div>
           </div>
         )}
         {/* Bottom Actions Row */}
