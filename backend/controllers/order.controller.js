@@ -81,7 +81,10 @@ export const createOrder = async (req, res) => {
     const order = orderResult.rows[0];
 
     // Création order items
+    // Création order items
     for (const item of items) {
+      console.log("ITEM =", item);
+
       await pool.query(
         `
     INSERT INTO order_items
@@ -89,7 +92,7 @@ export const createOrder = async (req, res) => {
       order_id,
       product_id,
       quantity,
-      price,
+      unit_price,
       variant_name,
       option_name
     )
