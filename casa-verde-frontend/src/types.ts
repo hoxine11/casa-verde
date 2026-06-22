@@ -16,10 +16,12 @@ export interface Product {
   variants?: ProductVariant[];
   options?: ProductOption[];
 
+  crepeSteps?: CrepeStepItem[];
+  crepeFormulas?: CrepeFormula[];
+
   selectedVariant?: ProductVariant | null;
   selectedOption?: ProductOption | null;
 }
-
 export interface Category {
   id: number;
   name: string;
@@ -95,4 +97,16 @@ export interface ProductOption {
   name: string;
   price: number;
   option_group: string;
+}
+export interface CrepeStepItem {
+  id?: number;
+  step_number: number;
+  name: string;
+  price: number;
+}
+
+export interface CrepeFormula {
+  id?: number;
+  name: string;
+  price: number;
 }

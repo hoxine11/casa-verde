@@ -89,7 +89,7 @@ export default function AdminDashboard({ orders, onViewOrder }: AdminDashboardPr
               <span className="font-sans text-xs uppercase font-bold tracking-wider">CA du Jour</span>
             </div>
             <p className="font-serif text-3xl sm:text-4xl font-bold tracking-tight mt-4 leading-none">
-              {(dailyRevenue || 6950).toLocaleString()} DZD
+              {(dailyRevenue ?? 0).toLocaleString()} DZD
             </p>
           </div>
         </motion.div>
@@ -109,7 +109,7 @@ export default function AdminDashboard({ orders, onViewOrder }: AdminDashboardPr
               <span className="font-sans text-xs uppercase font-semibold tracking-wider">CA du Mois</span>
             </div>
             <p className="font-serif text-3xl sm:text-4xl font-extrabold tracking-tight mt-4 leading-none text-brand-gold">
-              {(totalRevenue || 9200).toLocaleString()} DZD
+              {(totalRevenue ?? 0).toLocaleString()} DZD
             </p>
           </div>
         </motion.div>

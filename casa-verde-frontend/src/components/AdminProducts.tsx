@@ -131,6 +131,8 @@ export default function AdminProducts({
     setIsActive(true);
     setIsEditing(true);
     setUploadSource('upload');
+    setCrepeSteps([]);
+    setCrepeFormulas([]);
   };
 
   const startEdit = (product: Product) => {
@@ -143,6 +145,13 @@ export default function AdminProducts({
     setIsActive(product.is_active);
     setVariants(product.variants || []);
     setOptions(product.options || []);
+    setCrepeSteps(
+      product.crepeSteps || []
+    );
+
+    setCrepeFormulas(
+      product.crepeFormulas || []
+    );
     setIsEditing(true);
     if (product.image_url && (product.image_url.startsWith('http') || product.image_url.startsWith('/'))) {
       setUploadSource('url');
@@ -150,6 +159,8 @@ export default function AdminProducts({
       setUploadSource('upload');
     }
   };
+  const [crepeSteps, setCrepeSteps] = useState<any[]>([]);
+  const [crepeFormulas, setCrepeFormulas] = useState<any[]>([]);
   const handleSave = async (
     e: React.FormEvent
   ) => {
@@ -198,6 +209,15 @@ export default function AdminProducts({
       formData.append(
         "options",
         JSON.stringify(options)
+      );
+      formData.append(
+        "crepeSteps",
+        JSON.stringify(crepeSteps)
+      );
+
+      formData.append(
+        "crepeFormulas",
+        JSON.stringify(crepeFormulas)
       );
 
       if (selectedFile) {
@@ -480,6 +500,150 @@ export default function AdminProducts({
                 >
                   + Ajouter Option
                 </button>
+              </div>
+            )}
+            {category.toLocaleLowerCase() === "crepes" && (
+              <div className="space-y-4 border-t pt-4">
+
+                <h3 className="font-bold text-brand-green">
+                  Étapes Crêpe
+                </h3>
+
+                {crepeSteps.map((step, index) => (
+                  <div
+                    key={index}
+                    className="flex gap-2"
+                  >
+                    <input
+                      type="number"
+                      placeholder="Étape"
+                      value={step.step_number}
+                      onChange={(e) => {
+                        const copy = [...crepeSteps];
+
+                        copy[index].step_number =
+                          Number(e.target.value);
+
+                        setCrepeSteps(copy);
+                      }}
+                      className="border rounded p-2 w-24"
+                    />
+
+                    <input
+                      type="text"
+                      placeholder="Nom"
+                      value={step.name}
+                      onChange={(e) => {
+                        const copy = [...crepeSteps];
+
+                        copy[index].name =
+                          e.target.value;
+
+                        setCrepeSteps(copy);
+                      }}
+                      className="border rounded p-2 flex-1"
+                    />
+
+                    <input
+                      type="number"
+                      placeholder="Prix"
+                      value={step.price}
+                      onChange={(e) => {
+                        const copy = [...crepeSteps];
+
+                        copy[index].price =
+                          Number(e.target.value);
+
+                        setCrepeSteps(copy);
+                      }}
+                      className="border rounded p-2 w-28"
+                    />
+                  </div>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCrepeSteps([
+                      ...crepeSteps,
+                      {
+                        step_number: 1,
+                        name: "",
+                        price: 100
+                      }
+                    ])
+                  }
+                  className="text-blue-600"
+                >
+                  + Ajouter Étape
+                </button>
+
+              </div>
+            )}
+            {category.toLocaleLowerCase() === "crepes" && (
+              <div className="space-y-4">
+
+                <h3 className="font-bold text-brand-green">
+                  Formules rapides
+                </h3>
+
+                {crepeFormulas.map(
+                  (formula, index) => (
+                    <div
+                      key={index}
+                      className="flex gap-2"
+                    >
+                      <input
+                        type="text"
+                        placeholder="3 Fruits"
+                        value={formula.name}
+                        onChange={(e) => {
+                          const copy =
+                            [...crepeFormulas];
+
+                          copy[index].name =
+                            e.target.value;
+
+                          setCrepeFormulas(copy);
+                        }}
+                        className="border rounded p-2 flex-1"
+                      />
+
+                      <input
+                        type="number"
+                        placeholder="250"
+                        value={formula.price}
+                        onChange={(e) => {
+                          const copy =
+                            [...crepeFormulas];
+
+                          copy[index].price =
+                            Number(e.target.value);
+
+                          setCrepeFormulas(copy);
+                        }}
+                        className="border rounded p-2 w-28"
+                      />
+                    </div>
+                  )
+                )}
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCrepeFormulas([
+                      ...crepeFormulas,
+                      {
+                        name: "",
+                        price: 250
+                      }
+                    ])
+                  }
+                  className="text-blue-600"
+                >
+                  + Ajouter Formule
+                </button>
+
               </div>
             )}
             {/* Image Upload/Capture Panel */}
