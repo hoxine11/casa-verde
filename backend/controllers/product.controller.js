@@ -265,7 +265,16 @@ SELECT
       WHERE v.product_id = p.id
     ),
     '[]'
-  ) AS variants
+  ) AS variants,
+
+  COALESCE(
+    (
+      SELECT json_agg(o)
+      FROM product_options o
+      WHERE o.product_id = p.id
+    ),
+    '[]'
+  ) AS options
 
 FROM products p
 LEFT JOIN categories c
