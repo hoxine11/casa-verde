@@ -21,6 +21,8 @@ export interface Product {
 
   selectedVariant?: ProductVariant | null;
   selectedOption?: ProductOption | null;
+  selectedCrepeSteps?: CrepeStepItem[];
+selectedFormula?: CrepeFormula | null;
 }
 export interface Category {
   id: number;

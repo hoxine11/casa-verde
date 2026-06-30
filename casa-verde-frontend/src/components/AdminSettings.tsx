@@ -19,18 +19,36 @@ export default function AdminSettings({ settings, onUpdateSettings }: AdminSetti
   const [deliveryFee, setDeliveryFee] = useState(settings.deliveryFee);
   const [facebook, setFacebook] = useState(settings.facebook);
   const [instagram, setInstagram] = useState(settings.instagram);
-  
+
   const [statusMessage, setStatusMessage] = useState('');
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    await fetch(
+      "https://casa-verde-production-1d5f.up.railway.app/api/settings",
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          restaurantName,
+          phone,
+          address,
+          deliveryFee,
+          facebook,
+          instagram,
+        }),
+      }
+    );
+
     onUpdateSettings({
       restaurantName,
       phone,
       address,
-      deliveryFee: Number(deliveryFee),
+      deliveryFee,
       facebook,
-      instagram
+      instagram,
     });
 
     setStatusMessage('Paramètres enregistrés avec succès !');
@@ -51,10 +69,10 @@ export default function AdminSettings({ settings, onUpdateSettings }: AdminSetti
 
       <div className="bg-brand-ivory rounded-3xl p-8 border border-brand-green/15 shadow-sm max-w-3xl">
         <form onSubmit={handleSave} className="space-y-6 font-sans text-xs font-medium">
-          
+
           {/* Restaurant identity details */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            
+
             <div className="space-y-2">
               <label className="text-brand-green block">Nom de l'établissement</label>
               <input
@@ -86,7 +104,7 @@ export default function AdminSettings({ settings, onUpdateSettings }: AdminSetti
 
           {/* Location and delivery settings */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            
+
             <div className="sm:col-span-2 space-y-2">
               <label className="text-brand-green block">Adresse postale de la boutique</label>
               <div className="relative">
@@ -119,9 +137,9 @@ export default function AdminSettings({ settings, onUpdateSettings }: AdminSetti
 
           <div className="border-t border-brand-green/10 pt-6">
             <h3 className="font-serif text-sm font-semibold text-brand-green mb-4">Réseaux sociaux</h3>
-            
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              
+
               <div className="space-y-2">
                 <label className="text-brand-green block flex items-center">
                   <Facebook className="w-3.5 h-3.5 mr-1 text-[#1877F2]" /> Facebook

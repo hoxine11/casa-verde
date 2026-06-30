@@ -52,10 +52,10 @@ import AdminSettings from './components/AdminSettings';
 const INITIAL_SETTINGS: Settings = {
   restaurantName: 'Casa Verde – Crêperie AS',
   phone: '+213 5 55 12 34 56',
-  address: 'Rue Didouche Mourad, Alger Centre',
+  address: 'BESSA,BERRIAN , GHARDAIA, ALGER',
   deliveryFee: 0,
-  facebook: 'https://facebook.com/casaverde',
-  instagram: 'https://instagram.com/casaverde'
+  facebook: 'https://www.facebook.com/105289945452858?ref=NONE_xav_ig_profile_page_web',
+  instagram: 'https://l.facebook.com/l.php?u=https%3A%2F%2Fwww.instagram.com%2Fcreperie_as%3Ffbclid%3DIwZXh0bgNhZW0CMTAAc3J0YwZhcHBfaWQQMjIyMDM5MTc4ODIwMDg5MgABHvtQ5JTBgbYlkjvftKPGpKbWoyUit_geaqsueMfMY09_B1cMr60Ndnc88OKi_aem_sU6yDrAdqWEqbaSb4CTaGw&h=AUBdsJ5oj0mblPAaaqmYtTnkqbFzvmVe8Eb1Q_7MvoQsOrF04L0o7C6PJPLw1koBju_K1z7EaTW-fcB-eru111AsqQOfc4NW8SQ9nz0BsDbHXXLuEpXh2uMbLHQPGMvZ6RmV'
 };
 
 export default function App() {
@@ -234,7 +234,21 @@ export default function App() {
     const saved = localStorage.getItem('cv_settings');
     return saved ? JSON.parse(saved) : INITIAL_SETTINGS;
   });
-
+  useEffect(() => {
+    fetch("https://casa-verde-production-1d5f.up.railway.app/api/settings")
+      .then((res) => res.json())
+      .then((data) => {
+        setSettings({
+          restaurantName: data.restaurant_name,
+          phone: data.phone,
+          address: data.address,
+          deliveryFee: Number(data.delivery_fee),
+          facebook: data.facebook,
+          instagram: data.instagram,
+        });
+      })
+      .catch(console.error);
+  }, []);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedQuickProduct, setSelectedQuickProduct] = useState<Product | null>(null);
 

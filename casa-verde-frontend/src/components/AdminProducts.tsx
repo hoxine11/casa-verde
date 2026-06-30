@@ -451,58 +451,60 @@ export default function AdminProducts({
                 </button>
               </div>
             )}
-            {category.toLowerCase() !== "tacos" && (
-              <div className="space-y-3">
-                <label className="font-bold text-brand-green">
-                  Options
-                </label>
+            {!["tacos", "crepe"].includes(
+              category.toLowerCase()
+            ) && (
+                <div className="space-y-3">
+                  <label className="font-bold text-brand-green">
+                    Options
+                  </label>
 
-                {options.map((option, index) => (
-                  <div
-                    key={index}
-                    className="flex gap-3"
+                  {options.map((option, index) => (
+                    <div
+                      key={index}
+                      className="flex gap-3"
+                    >
+                      <input
+                        type="text"
+                        placeholder="Camembert"
+                        value={option.name}
+                        onChange={(e) => {
+                          const copy = [...options];
+                          copy[index].name = e.target.value;
+                          setOptions(copy);
+                        }}
+                        className="border rounded p-2 flex-1"
+                      />
+
+                      <input
+                        type="number"
+                        placeholder="100"
+                        value={option.price}
+                        onChange={(e) => {
+                          const copy = [...options];
+                          copy[index].price = Number(e.target.value);
+                          setOptions(copy);
+                        }}
+                        className="border rounded p-2 flex-1"
+                      />
+                    </div>
+                  ))}
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setOptions([
+                        ...options,
+                        { name: "", price: 0 }
+                      ])
+                    }
+                    className="text-sm text-blue-600"
                   >
-                    <input
-                      type="text"
-                      placeholder="Camembert"
-                      value={option.name}
-                      onChange={(e) => {
-                        const copy = [...options];
-                        copy[index].name = e.target.value;
-                        setOptions(copy);
-                      }}
-                      className="border rounded p-2 flex-1"
-                    />
-
-                    <input
-                      type="number"
-                      placeholder="100"
-                      value={option.price}
-                      onChange={(e) => {
-                        const copy = [...options];
-                        copy[index].price = Number(e.target.value);
-                        setOptions(copy);
-                      }}
-                      className="border rounded p-2 flex-1"
-                    />
-                  </div>
-                ))}
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    setOptions([
-                      ...options,
-                      { name: "", price: 0 }
-                    ])
-                  }
-                  className="text-sm text-blue-600"
-                >
-                  + Ajouter Option
-                </button>
-              </div>
-            )}
-            {category.toLocaleLowerCase() === "crepes" && (
+                    + Ajouter Option
+                  </button>
+                </div>
+              )}
+            {category.toLowerCase() === "crepe" && (
               <div className="space-y-4 border-t pt-4">
 
                 <h3 className="font-bold text-brand-green">
@@ -580,7 +582,7 @@ export default function AdminProducts({
 
               </div>
             )}
-            {category.toLocaleLowerCase() === "crepes" && (
+            {category.toLowerCase() === "crepe" && (
               <div className="space-y-4">
 
                 <h3 className="font-bold text-brand-green">
@@ -910,6 +912,48 @@ export default function AdminProducts({
                                 + {option.name} ({option.price} DZD)
                               </span>
                             ))}
+                          </div>
+                        )}
+                      {/* Étapes Crêpe */}
+                      {product.crepeSteps &&
+                        product.crepeSteps.length > 0 && (
+                          <div className="mt-3">
+                            <p className="text-[11px] font-bold text-brand-green mb-2">
+                              Étapes
+                            </p>
+
+                            <div className="flex flex-wrap gap-2">
+                              {product.crepeSteps.map((step) => (
+                                <span
+                                  key={step.id}
+                                  className="px-2 py-1 rounded-full bg-blue-50 text-blue-700 text-[10px]"
+                                >
+                                  E{step.step_number} • {step.name}
+                                  (+{step.price})
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      {/* Formules */}
+                      {product.crepeFormulas &&
+                        product.crepeFormulas.length > 0 && (
+                          <div className="mt-3">
+                            <p className="text-[11px] font-bold text-brand-green mb-2">
+                              Formules
+                            </p>
+
+                            <div className="flex flex-wrap gap-2">
+                              {product.crepeFormulas.map((formula) => (
+                                <span
+                                  key={formula.id}
+                                  className="px-2 py-1 rounded-full bg-amber-50 text-amber-700 text-[10px]"
+                                >
+                                  {formula.name}
+                                  (+{formula.price})
+                                </span>
+                              ))}
+                            </div>
                           </div>
                         )}
                     </div>

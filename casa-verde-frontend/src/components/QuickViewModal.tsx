@@ -6,8 +6,8 @@
 import { X, Plus, Clock, ShieldAlert } from 'lucide-react';
 import { motion } from 'motion/react';
 
-import { Product, ProductVariant, ProductOption } from '../types';
-import { useState , useEffect} from 'react';
+import { Product, ProductVariant, ProductOption, CrepeFormula, CrepeStepItem } from '../types';
+import { useState, useEffect } from 'react';
 
 interface QuickViewModalProps {
   product: Product | null;
@@ -34,7 +34,11 @@ export default function QuickViewModal({
 
   const [selectedOption, setSelectedOption] =
     useState<ProductOption | null>(null);
+  const [selectedCrepeSteps, setSelectedCrepeSteps] =
+    useState<CrepeStepItem[]>([]);
 
+  const [selectedFormula, setSelectedFormula] =
+    useState<CrepeFormula | null>(null);
   useEffect(() => {
     if (!product) return;
 
@@ -199,9 +203,16 @@ export default function QuickViewModal({
                   <span className="font-serif text-2xl font-bold text-brand-green">
                     {
                       (
-                        (selectedVariant?.price || product.price)
+                        Number(selectedVariant?.price || product.price)
                         +
-                        (selectedOption?.price || 0)
+                        Number(selectedOption?.price || 0)
+                        +
+                        selectedCrepeSteps.reduce(
+                          (sum, step) => sum + Number(step.price),
+                          0
+                        )
+                        +
+                        Number(selectedFormula?.price || 0)
                       ).toLocaleString()
                     }
                   </span>
@@ -214,10 +225,20 @@ export default function QuickViewModal({
                       ...product,
                       selectedVariant,
                       selectedOption,
+                      selectedCrepeSteps,
+                      selectedFormula,
+
                       price:
-                        (selectedVariant?.price || product.price)
+                        Number(selectedVariant?.price || product.price)
                         +
-                        (selectedOption?.price || 0)
+                        Number(selectedOption?.price || 0)
+                        +
+                        selectedCrepeSteps.reduce(
+                          (sum, step) => sum + Number(step.price),
+                          0
+                        )
+                        +
+                        Number(selectedFormula?.price || 0)
                     });
                     onClose();
                   }}
