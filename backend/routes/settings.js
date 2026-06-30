@@ -3,7 +3,7 @@ import express from "express";
 import {
   getSettings,
   updateSettings
-} from "../controllers/settingsController.js";
+} from "../controllers/settings.Controller.js";
 
 const router = express.Router();
 
