@@ -8,6 +8,7 @@ import orderRoutes from "./routes/order.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import productOptionRoutes from "./routes/productOption.routes.js";
 import productVariantRoutes from "./routes/productVariant.routes.js";
+import settingsRoutes from "./routes/settings.js";
 dotenv.config();
 
 const app = express();
@@ -22,7 +23,7 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/orders", orderRoutes);
 
 app.use("/api/admin", adminRoutes);
-
+app.use("/api/settings", settingsRoutes);
 app.use("/api/product-options", productOptionRoutes);
 app.use("/api/product-variants", productVariantRoutes);
 const PORT = process.env.PORT || 8080;
