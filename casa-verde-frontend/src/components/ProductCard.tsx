@@ -86,9 +86,9 @@ export default function ProductCard({ product, onAddToCart, onQuickView }: Produ
           </h3>
         </div>
 
-        {/* <p className="font-sans text-xs text-brand-green/70 mb-6 line-clamp-3 leading-relaxed font-light flex-grow">
-          {product.description || 'Une délicieuse création artisanale préparée à la commande avec des ingrédients frais.'}
-        </p> */}
+        <p className="font-sans text-xs text-brand-green/70 mb-6 line-clamp-3 leading-relaxed font-light flex-grow">
+          {product.description }
+        </p>
         {product.variants && product.variants.length > 0 && (
 
           <div className="mb-4">

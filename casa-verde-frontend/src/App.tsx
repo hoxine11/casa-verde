@@ -805,79 +805,7 @@ export default function App() {
               </section>
 
               {/* Prestigieux Testimonials section */}
-              <section className="py-20 bg-brand-ivory select-none">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                  <div className="text-center max-w-xl mx-auto mb-16">
-                    <span className="font-sans text-[10px] uppercase tracking-[0.25em] font-extrabold text-brand-gold-dark mb-2 block">
-                      Avis Clients
-                    </span>
-                    <h2 className="font-serif text-3xl font-bold text-brand-green">
-                      Témoignages de nos gourmets
-                    </h2>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-
-                    <div className="bg-white p-8 rounded-none shadow-premium border border-brand-green/10 flex flex-col justify-between hover:border-brand-gold/40 transition-colors duration-300">
-                      <p className="font-sans text-xs text-brand-green/80 italic leading-relaxed font-light mb-6">
-                        "Les tacos sont d'une générosité folle, bien gratinés et croustillants. Et le service de livraison livra en moins de 25 minutes chrono à Belfort. Je commande toutes les semaines !"
-                      </p>
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 rounded-none bg-brand-green border border-brand-gold/20 flex items-center justify-center font-bold text-brand-ivory font-serif">
-                          Y
-                        </div>
-                        <div>
-                          <p className="font-serif text-sm font-bold text-brand-green">Yacine Boumediene</p>
-                          <div className="flex text-brand-gold mt-1">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                              <Star key={i} className="w-2.5 h-2.5 fill-brand-gold stroke-none" />
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-white p-8 rounded-none shadow-premium border border-brand-green/10 flex flex-col justify-between hover:border-brand-gold/40 transition-colors duration-300">
-                      <p className="font-sans text-xs text-brand-green/80 italic leading-relaxed font-light mb-6">
-                        "Un délice absolu ! Les crêpes au Nutella rappellent les vacances en Bretagne, avec une touche créative de Kinder Bueno. Emballage impeccable, encore chaud à l'arrivée !"
-                      </p>
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 rounded-none bg-brand-green border border-brand-gold/20 flex items-center justify-center font-bold text-brand-ivory font-serif">
-                          L
-                        </div>
-                        <div>
-                          <p className="font-serif text-sm font-bold text-brand-green">Lina Hammadi</p>
-                          <div className="flex text-brand-gold mt-1">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                              <Star key={i} className="w-2.5 h-2.5 fill-brand-gold stroke-none" />
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-white p-8 rounded-none shadow-premium border border-brand-green/10 flex flex-col justify-between hover:border-brand-gold/40 transition-colors duration-300">
-                      <p className="font-sans text-xs text-brand-green/80 italic leading-relaxed font-light mb-6">
-                        "Ma première commande de Poutine Tacos fut une révélation. La sauce fromagère maison fait toute la différence. Je recommande vivement pour tous les gourmets exigeants."
-                      </p>
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 rounded-none bg-brand-green border border-brand-gold/20 flex items-center justify-center font-bold text-brand-ivory font-serif">
-                          K
-                        </div>
-                        <div>
-                          <p className="font-serif text-sm font-bold text-brand-green">Karim Saadi</p>
-                          <div className="flex text-brand-gold mt-1">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                              <Star key={i} className="w-2.5 h-2.5 fill-brand-gold stroke-none" />
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                  </div>
-                </div>
-              </section>
+              
 
               {/* Big CTA banner section */}
               <section className="py-20 bg-brand-green text-brand-ivory relative overflow-hidden select-none">
@@ -1338,41 +1266,7 @@ export default function App() {
                 </div>
 
                 {/* Tracking Milestones timeline widget */}
-                <div className="space-y-4 text-left">
-                  <h4 className="font-serif text-sm font-bold text-brand-green text-center mb-6">Suivi de la livraison</h4>
-
-                  <div className="space-y-4 max-w-xs mx-auto">
-                    {[
-                      { label: 'Commande approuvée', done: true, current: false },
-                      { label: 'Préparation fine en cuisine', done: false, current: true },
-                      { label: 'Rider en route', done: false, current: false },
-                      { label: 'Plats livrés chauds', done: false, current: false }
-                    ].map((step, idx) => (
-                      <div key={idx} className="flex items-center space-x-3.5">
-                        <div
-                          className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold border shrink-0 ${step.done
-                            ? 'bg-emerald-500 border-emerald-600 text-white shadow-sm'
-                            : step.current
-                              ? 'bg-brand-gold border-brand-gold-dark text-brand-green shadow animate-pulse'
-                              : 'bg-brand-green/5 border-brand-green/15 text-brand-green/50'
-                            }`}
-                        >
-                          {step.done ? '✓' : idx + 1}
-                        </div>
-                        <span
-                          className={`font-sans text-xs font-semibold ${step.current
-                            ? 'text-brand-green-dark scale-103 font-bold'
-                            : step.done
-                              ? 'text-emerald-700/80 line-through decoration-emerald-800/25'
-                              : 'text-brand-green/55 font-light'
-                            }`}
-                        >
-                          {step.label}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                
 
                 <div className="pt-4">
                   <button
