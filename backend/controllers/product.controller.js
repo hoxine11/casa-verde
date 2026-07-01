@@ -142,11 +142,16 @@ export const updateProduct = async (req, res) => {
     const { name, description, price, category_id, is_active } = req.body;
 
     const variants = JSON.parse(req.body.variants || "[]");
-
     const options = JSON.parse(req.body.options || "[]");
     const crepeSteps = JSON.parse(req.body.crepeSteps || "[]");
-
     const crepeFormulas = JSON.parse(req.body.crepeFormulas || "[]");
+
+    let imageUrl = null;
+
+    if (req.file) {
+      const resultImage = await cloudinary.uploader.upload(req.file.path);
+      imageUrl = resultImage.secure_url;
+    }
 
     await pool.query(
       `
@@ -154,24 +159,33 @@ export const updateProduct = async (req, res) => {
       SET
         name = $1,
         description = $2,
-        price = $3,
-        category_id = $4,
-        is_active = $5
-      WHERE id = $6
+        image_url = COALESCE($3, image_url),
+        price = $4,
+        category_id = $5,
+        is_active = $6
+      WHERE id = $7
       `,
-      [name, description, price, category_id, is_active === "true", id],
+      [
+        name,
+        description,
+        imageUrl,
+        price,
+        category_id,
+        is_active === "true",
+        id,
+      ]
     );
 
-    // حذف الأحجام القديمة
+    // ---------------- VARIANTS ----------------
+
     await pool.query(
       `
       DELETE FROM product_variants
       WHERE product_id = $1
       `,
-      [id],
+      [id]
     );
 
-    // إعادة إدخال الأحجام الجديدة
     for (const variant of variants) {
       if (!variant.name) continue;
 
@@ -185,20 +199,20 @@ export const updateProduct = async (req, res) => {
         )
         VALUES ($1,$2,$3)
         `,
-        [id, variant.name, variant.price || 0],
+        [id, variant.name, variant.price || 0]
       );
     }
 
-    // حذف الخيارات القديمة
+    // ---------------- OPTIONS ----------------
+
     await pool.query(
       `
       DELETE FROM product_options
       WHERE product_id = $1
       `,
-      [id],
+      [id]
     );
 
-    // إعادة إدخال الخيارات الجديدة
     for (const option of options) {
       if (!option.name) continue;
 
@@ -212,13 +226,78 @@ export const updateProduct = async (req, res) => {
         )
         VALUES ($1,$2,$3)
         `,
-        [id, option.name, option.price || 0],
+        [id, option.name, option.price || 0]
+      );
+    }
+
+    // ---------------- CREPE STEPS ----------------
+
+    await pool.query(
+      `
+      DELETE FROM crepe_step_items
+      WHERE product_id = $1
+      `,
+      [id]
+    );
+
+    for (const step of crepeSteps) {
+      if (!step.name) continue;
+
+      await pool.query(
+        `
+        INSERT INTO crepe_step_items
+        (
+          product_id,
+          step_number,
+          name,
+          price
+        )
+        VALUES ($1,$2,$3,$4)
+        `,
+        [
+          id,
+          step.step_number,
+          step.name,
+          step.price || 0,
+        ]
+      );
+    }
+
+    // ---------------- CREPE FORMULAS ----------------
+
+    await pool.query(
+      `
+      DELETE FROM crepe_formulas
+      WHERE product_id = $1
+      `,
+      [id]
+    );
+
+    for (const formula of crepeFormulas) {
+      if (!formula.name) continue;
+
+      await pool.query(
+        `
+        INSERT INTO crepe_formulas
+        (
+          product_id,
+          name,
+          price
+        )
+        VALUES ($1,$2,$3)
+        `,
+        [
+          id,
+          formula.name,
+          formula.price || 0,
+        ]
       );
     }
 
     return res.json({
       message: "Produit modifié avec succès",
     });
+
   } catch (error) {
     console.error(error);
 
