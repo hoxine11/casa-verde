@@ -9,11 +9,11 @@ export const getSettings = async (req, res) => {
       LIMIT 1
     `);
 
-    res.json(result.rows[0]);
+    return res.json(result.rows[0]);
 
   } catch (err) {
 
-    res.status(500).json({
+    return res.status(500).json({
       error: err.message
     });
 
@@ -37,33 +37,31 @@ export const updateSettings = async (req, res) => {
       `
       UPDATE settings
       SET
-
-      restaurant_name = $1,
-      phone = $2,
-      address = $3,
-      delivery_fee = $4,
-      facebook = $5,
-      instagram = $6
-
+        restaurant_name = $1,
+        phone = $2,
+        address = $3,
+        delivery_fee = $4,
+        facebook = $5,
+        instagram = $6
       WHERE id = 1
       `,
       [
         restaurantName,
         phone,
         address,
-        deliveryFee,
+        deliveryFee, // maintenant c'est un texte
         facebook,
         instagram
       ]
     );
 
-    res.json({
+    return res.json({
       message: "Settings updated"
     });
 
   } catch (err) {
 
-    res.status(500).json({
+    return res.status(500).json({
       error: err.message
     });
 
