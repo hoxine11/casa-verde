@@ -39,7 +39,7 @@ export default function AdminAnalytics({ orders }: AdminAnalyticsProps) {
 
   // Compiling orders dynamically
   orders.forEach((order) => {
-    if (order.status === 'Cancelled') return;
+    if (order.status === 'cancelled') return;
     
     // Parse date if possible, otherwise we spread it over the end days or matching day index
     let dayIndex = 5; // default Friday
@@ -79,7 +79,7 @@ export default function AdminAnalytics({ orders }: AdminAnalyticsProps) {
   // Category distribution analysis
   const categoryCounts: Record<string, number> = {};
   orders.forEach((o) => {
-    if (o.status === 'Cancelled') return;
+    if (o.status === 'cancelled') return;
     o.items.forEach((item) => {
       // Get category name or fallback to menu defaults
       const cat = item.name.toLowerCase().includes('crêpe')
@@ -113,7 +113,7 @@ export default function AdminAnalytics({ orders }: AdminAnalyticsProps) {
 
   // Global KPIs stats
   const totalSalesVal = orders
-    .filter((o) => o.status !== 'Cancelled')
+    .filter((o) => o.status !== 'cancelled')
     .reduce((sum, o) => sum + o.total, 0);
 
   const averageBasket = orders.length > 0 ? Math.round(totalSalesVal / orders.length) : 0;

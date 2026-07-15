@@ -20,13 +20,33 @@ export default function AdminDashboard({ orders, onViewOrder }: AdminDashboardPr
   const deliveredOrders = orders.filter((o) => o.status === 'delivered').length;
 
   // Revenue computations
-  const totalRevenue = orders
-    .filter((o) => o.status !== 'cancelled')
-    .reduce((sum, o) => sum + o.total, 0);
+  const today = new Date();
 
-  // Revenue for today
   const dailyRevenue = orders
-    .filter((o) => o.status !== "cancelled")
+    .filter((o) => {
+      if (o.status !== "delivered") return false;
+
+     const orderDate = new Date(o.created_at);
+
+      return (
+        orderDate.getDate() === today.getDate() &&
+        orderDate.getMonth() === today.getMonth() &&
+        orderDate.getFullYear() === today.getFullYear()
+      );
+    })
+    .reduce((sum, o) => sum + Number(o.total), 0);
+
+  const monthlyRevenue = orders
+    .filter((o) => {
+      if (o.status === "cancelled") return false;
+
+     const orderDate = new Date(o.created_at);
+
+      return (
+        orderDate.getMonth() === today.getMonth() &&
+        orderDate.getFullYear() === today.getFullYear()
+      );
+    })
     .reduce((sum, o) => sum + Number(o.total), 0);
 
   const cardVariants = {
@@ -109,7 +129,7 @@ export default function AdminDashboard({ orders, onViewOrder }: AdminDashboardPr
               <span className="font-sans text-xs uppercase font-semibold tracking-wider">CA du Mois</span>
             </div>
             <p className="font-serif text-3xl sm:text-4xl font-extrabold tracking-tight mt-4 leading-none text-brand-gold">
-              {(totalRevenue ?? 0).toLocaleString()} DZD
+              {monthlyRevenue.toLocaleString()} DZD
             </p>
           </div>
         </motion.div>

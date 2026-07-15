@@ -26,13 +26,30 @@ export default function ProductCard({ product, onAddToCart, onQuickView }: Produ
   const [crepeMode, setCrepeMode] = useState<
     "none" | "steps" | "formula"
   >("none");
+  const category = product.category?.toLowerCase();
+
+  const isCustomDessert =
+    category === "crepe" ||
+    category === "gaufre" ||
+    category === "mini pancakes";
+  const isSandwich =
+    category === "sandwitch";
   const [selectedFormula, setSelectedFormula] =
     useState<CrepeFormula | null>(null);
+  const [selectedOptions, setSelectedOptions] =
+    useState<ProductOption[]>([]);
   const [selectedStep, setSelectedStep] =
     useState<number | null>(null);
   const finalPrice =
     Number(selectedVariant?.price || product.price) +
-    Number(selectedOption?.price || 0) +
+    (
+      isSandwich
+        ? selectedOptions.reduce(
+          (sum, option) => sum + Number(option.price),
+          0
+        )
+        : Number(selectedOption?.price || 0)
+    ) +
     selectedCrepeSteps.reduce(
       (sum, step) => sum + Number(step.price),
       0
@@ -87,7 +104,7 @@ export default function ProductCard({ product, onAddToCart, onQuickView }: Produ
         </div>
 
         <p className="font-sans text-xs text-brand-green/70 mb-6 line-clamp-3 leading-relaxed font-light flex-grow">
-          {product.description }
+          {product.description}
         </p>
         {product.variants && product.variants.length > 0 && (
 
@@ -123,7 +140,19 @@ export default function ProductCard({ product, onAddToCart, onQuickView }: Produ
 
               <button
                 type="button"
-                onClick={() => setSelectedOption(null)}
+                onClick={() => {
+
+                  if (isSandwich) {
+
+                    setSelectedOptions([]);
+
+                  } else {
+
+                    setSelectedOption(null);
+
+                  }
+
+                }}
                 className={`px-3 py-1 border rounded text-xs ${selectedOption === null
                   ? "bg-brand-green text-white"
                   : "bg-white"
@@ -132,26 +161,62 @@ export default function ProductCard({ product, onAddToCart, onQuickView }: Produ
                 Aucune
               </button>
 
-              {product.options.map((option) => (
-                <button
-                  key={option.id}
-                  type="button"
-                  onClick={() => setSelectedOption(option)}
-                  className={`px-3 py-1 border rounded text-xs ${selectedOption?.id === option.id
-                    ? "bg-brand-green text-white"
-                    : "bg-white"
-                    }`}
-                >
-                  {option.name}
-                  <span className="ml-1 text-[10px]">
-                    +{option.price}
-                  </span>
-                </button>
-              ))}
+              {product.options.map((option) => {
+
+                const isSelected = isSandwich
+                  ? selectedOptions.some(o => o.id === option.id)
+                  : selectedOption?.id === option.id;
+
+                return (
+
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => {
+
+                      if (isSandwich) {
+
+                        if (isSelected) {
+
+                          setSelectedOptions(prev =>
+                            prev.filter(o => o.id !== option.id)
+                          );
+
+                        } else {
+
+                          setSelectedOptions(prev => [
+                            ...prev,
+                            option
+                          ]);
+
+                        }
+
+                      } else {
+
+                        setSelectedOption(option);
+
+                      }
+
+                    }}
+                    className={`px-3 py-1 border rounded text-xs ${isSelected
+                      ? "bg-brand-green text-white"
+                      : "bg-white"
+                      }`}
+                  >
+                    {option.name}
+                    <span className="ml-1 text-[10px]">
+                      +{option.price}
+                    </span>
+                  </button>
+
+                );
+
+              })}
             </div>
           </div>
         )}
-        {product.category?.toLowerCase() === "crepe" && (
+
+        {isCustomDessert && (
           <div className="mb-4">
 
             <p className="text-xs font-semibold mb-2">
@@ -280,8 +345,8 @@ export default function ProductCard({ product, onAddToCart, onQuickView }: Produ
                         setSelectedFormula(formula)
                       }
                       className={`px-3 py-1 border rounded text-xs ${selectedFormula?.id === formula.id
-                          ? "bg-brand-green text-white"
-                          : "bg-white"
+                        ? "bg-brand-green text-white"
+                        : "bg-white"
                         }`}
                     >
                       {formula.name}
@@ -311,7 +376,13 @@ export default function ProductCard({ product, onAddToCart, onQuickView }: Produ
               onAddToCart({
                 ...product,
                 selectedVariant,
-                selectedOption,
+                selectedOption: isSandwich
+                  ? null
+                  : selectedOption,
+
+                selectedOptions: isSandwich
+                  ? selectedOptions
+                  : [],
                 selectedCrepeSteps,
                 selectedFormula,
                 price: finalPrice

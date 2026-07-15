@@ -1,9 +1,5 @@
 export const printOrder = (order: any) => {
-  const printWindow = window.open(
-    "",
-    "_blank",
-    "width=400,height=700"
-  );
+  const printWindow = window.open("", "_blank", "width=400,height=700");
 
   if (!printWindow) return;
 
@@ -14,11 +10,26 @@ export const printOrder = (order: any) => {
       <title>Commande #${order.id}</title>
 
       <style>
+        @page{
+    size:80mm auto;
+    margin:0;
+}
+
+        *{
+          box-sizing:border-box;
+        }
+
+        html{
+          width:80mm;
+          margin:0;
+          padding:0;
+        }
+
         body{
           font-family: Arial, sans-serif;
           width:80mm;
           margin:0;
-          padding:10px;
+          padding:5mm;
           color:#000;
         }
 
@@ -57,9 +68,22 @@ export const printOrder = (order: any) => {
         }
 
         @media print{
+          @page{
+            margin:0;
+          }
+
+          html,
           body{
             width:80mm;
+            margin:0;
+            padding:0;
           }
+
+         .ticket{
+    width:72mm;
+    margin:auto;
+    padding:3mm;
+}
 
           button{
             display:none;
@@ -69,6 +93,7 @@ export const printOrder = (order: any) => {
     </head>
 
     <body>
+      <div class="ticket">
 
       <div class="center">
 
@@ -120,7 +145,9 @@ export const printOrder = (order: any) => {
 
       <div class="line"></div>
 
-      ${order.items.map((item:any)=>`
+      ${order.items
+        .map(
+          (item: any) => `
         <div class="row">
           <span>
             ${item.quantity} x ${item.product_name || item.name}
@@ -130,7 +157,9 @@ export const printOrder = (order: any) => {
             ${(item.price * item.quantity).toFixed(0)} DA
           </span>
         </div>
-      `).join("")}
+      `,
+        )
+        .join("")}
 
       <div class="line"></div>
 
@@ -157,10 +186,14 @@ export const printOrder = (order: any) => {
         Merci pour votre confiance
       </div>
 
+      </div>
+
       <script>
         window.onload = () => {
-          window.print();
-          window.close();
+          setTimeout(() => {
+            window.print();
+            window.close();
+          }, 100);
         }
       </script>
 

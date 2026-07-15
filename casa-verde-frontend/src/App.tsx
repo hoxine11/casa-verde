@@ -53,7 +53,7 @@ const INITIAL_SETTINGS: Settings = {
   restaurantName: 'Casa Verde – Crêperie AS',
   phone: '+213 5 55 12 34 56',
   address: 'BESSA,BERRIAN , GHARDAIA, ALGER',
-  deliveryFee: 0,
+  deliveryFee: "",
   facebook: 'https://www.facebook.com/105289945452858?ref=NONE_xav_ig_profile_page_web',
   instagram: 'https://l.facebook.com/l.php?u=https%3A%2F%2Fwww.instagram.com%2Fcreperie_as%3Ffbclid%3DIwZXh0bgNhZW0CMTAAc3J0YwZhcHBfaWQQMjIyMDM5MTc4ODIwMDg5MgABHvtQ5JTBgbYlkjvftKPGpKbWoyUit_geaqsueMfMY09_B1cMr60Ndnc88OKi_aem_sU6yDrAdqWEqbaSb4CTaGw&h=AUBdsJ5oj0mblPAaaqmYtTnkqbFzvmVe8Eb1Q_7MvoQsOrF04L0o7C6PJPLw1koBju_K1z7EaTW-fcB-eru111AsqQOfc4NW8SQ9nz0BsDbHXXLuEpXh2uMbLHQPGMvZ6RmV'
 };
@@ -205,22 +205,30 @@ export default function App() {
           address: order.address,
           neighborhood: order.district,
           comment: order.comment || "",
+
           subtotal: Number(order.subtotal),
-          deliveryFee: Number(order.delivery_fee),
+
+          deliveryFee:
+            isNaN(Number(order.delivery_fee))
+              ? order.delivery_fee
+              : Number(order.delivery_fee),
+
           total: Number(order.total),
+
+          created_at: order.created_at,
           date: new Date(order.created_at).toLocaleString(),
+
           status: order.status.toLowerCase(),
 
           items: (order.items || []).map((item: any) => ({
             id: item.id,
             productId: item.productId,
             name: item.name,
-            price: item.price,
+            price: Number(item.price),
             quantity: item.quantity,
-
             variant_name: item.variant_name,
             option_name: item.option_name,
-          }))
+          })),
         }));
         console.log(mappedOrders);
         setOrders(mappedOrders);
@@ -242,7 +250,7 @@ export default function App() {
           restaurantName: data.restaurant_name,
           phone: data.phone,
           address: data.address,
-          deliveryFee: Number(data.delivery_fee),
+          deliveryFee: (data.delivery_fee),
           facebook: data.facebook,
           instagram: data.instagram,
         });
@@ -300,9 +308,8 @@ export default function App() {
   }, [cart]);
 
   const cartTotal = useMemo(() => {
-    if (cart.length === 0) return 0;
-    return cartSubtotal + settings.deliveryFee;
-  }, [cartSubtotal, settings.deliveryFee, cart.length]);
+    return cartSubtotal;
+  }, [cartSubtotal]);
 
   // Handle Cart operators
   const handleAddToCart = (product: Product) => {
@@ -358,7 +365,7 @@ export default function App() {
 
         subtotal: cartSubtotal,
         deliveryFee: settings.deliveryFee,
-        total: cartTotal,
+        total: cartSubtotal,
 
         items: cart.map((item) => ({
           productId: item.product.id,
@@ -805,7 +812,7 @@ export default function App() {
               </section>
 
               {/* Prestigieux Testimonials section */}
-              
+
 
               {/* Big CTA banner section */}
               <section className="py-20 bg-brand-green text-brand-ivory relative overflow-hidden select-none">
@@ -1043,11 +1050,15 @@ export default function App() {
                         </div>
                         <div className="flex justify-between text-brand-green/75 pb-4 border-b border-brand-green/5">
                           <span>Frais de livraison</span>
-                          <span className="font-bold">{settings.deliveryFee.toLocaleString()} DZD</span>
+                          <span className="font-bold">
+                            {settings.deliveryFee}
+                          </span>
                         </div>
                         <div className="flex justify-between font-serif text-lg font-bold text-brand-green-dark pt-2">
                           <span>Total</span>
-                          <span className="text-brand-gold-dark">{cartTotal.toLocaleString()} DZD</span>
+                          <span className="text-brand-gold-dark">
+                            À confirmer
+                          </span>
                         </div>
                       </div>
 
@@ -1266,7 +1277,7 @@ export default function App() {
                 </div>
 
                 {/* Tracking Milestones timeline widget */}
-                
+
 
                 <div className="pt-4">
                   <button

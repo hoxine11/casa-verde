@@ -21,6 +21,8 @@ export interface Product {
 
   selectedVariant?: ProductVariant | null;
   selectedOption?: ProductOption | null;
+  selectedOptions?: ProductOption[]; // للسندويتش فقط
+
   selectedCrepeSteps?: CrepeStepItem[];
 selectedFormula?: CrepeFormula | null;
 }
@@ -59,7 +61,7 @@ export interface Order {
   comment?: string;
   items: OrderItem[];
   subtotal: number;
-  deliveryFee: number;
+  deliveryFee: string | number;
   total: number;
   date: string;
   status:
@@ -67,13 +69,14 @@ export interface Order {
   | 'confirmed'
   | 'delivered'
   | 'cancelled';
+  created_at: string;
 }
 
 export interface Settings {
   restaurantName: string;
   phone: string;
   address: string;
-  deliveryFee: number;
+  deliveryFee: string;
   facebook: string;
   instagram: string;
 }

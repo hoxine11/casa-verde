@@ -123,12 +123,11 @@ export default function AdminSettings({ settings, onUpdateSettings }: AdminSetti
             <div className="space-y-2">
               <label className="text-brand-green block">Frais de livraison standard (DZD)</label>
               <input
-                type="number"
+                type="text"
                 required
-                min="0"
                 value={deliveryFee}
-                onChange={(e) => setDeliveryFee(Number(e.target.value))}
-                placeholder="200"
+                onChange={(e) => setDeliveryFee(e.target.value)}
+                placeholder="Ex : De 100 à 200 DZD"
                 className="w-full bg-brand-green/5 border border-brand-green/10 rounded-xl py-3 px-4 text-brand-green outline-none focus:ring-1 focus:ring-brand-gold focus:border-brand-gold transition-all"
               />
             </div>
