@@ -58,20 +58,28 @@ export const createProduct = async (req, res) => {
     }
 
     // Sauvegarde des options
+    // ---------------- OPTIONS ----------------
+
     for (const option of options) {
       if (!option.name) continue;
 
       await pool.query(
         `
-        INSERT INTO product_options
-        (
-          product_id,
-          name,
-          price
-        )
-        VALUES ($1,$2,$3)
-        `,
-        [product.id, option.name, option.price || 0],
+    INSERT INTO product_options
+    (
+      product_id,
+      name,
+      price,
+      option_group
+    )
+    VALUES ($1,$2,$3,$4)
+    `,
+        [
+          product.id,
+          option.name,
+          option.price || 0,
+          option.option_group || null,
+        ],
       );
     }
     for (const step of crepeSteps) {
@@ -173,7 +181,7 @@ export const updateProduct = async (req, res) => {
         category_id,
         is_active === "true",
         id,
-      ]
+      ],
     );
 
     // ---------------- VARIANTS ----------------
@@ -183,7 +191,7 @@ export const updateProduct = async (req, res) => {
       DELETE FROM product_variants
       WHERE product_id = $1
       `,
-      [id]
+      [id],
     );
 
     for (const variant of variants) {
@@ -199,7 +207,7 @@ export const updateProduct = async (req, res) => {
         )
         VALUES ($1,$2,$3)
         `,
-        [id, variant.name, variant.price || 0]
+        [id, variant.name, variant.price || 0],
       );
     }
 
@@ -210,7 +218,7 @@ export const updateProduct = async (req, res) => {
       DELETE FROM product_options
       WHERE product_id = $1
       `,
-      [id]
+      [id],
     );
 
     for (const option of options) {
@@ -220,13 +228,14 @@ export const updateProduct = async (req, res) => {
         `
         INSERT INTO product_options
         (
-          product_id,
-          name,
-          price
-        )
-        VALUES ($1,$2,$3)
+  product_id,
+  name,
+  price,
+  option_group
+)
+VALUES ($1,$2,$3,$4)
         `,
-        [id, option.name, option.price || 0]
+        [id, option.name, option.price || 0, option.option_group || null],
       );
     }
 
@@ -237,7 +246,7 @@ export const updateProduct = async (req, res) => {
       DELETE FROM crepe_step_items
       WHERE product_id = $1
       `,
-      [id]
+      [id],
     );
 
     for (const step of crepeSteps) {
@@ -254,12 +263,7 @@ export const updateProduct = async (req, res) => {
         )
         VALUES ($1,$2,$3,$4)
         `,
-        [
-          id,
-          step.step_number,
-          step.name,
-          step.price || 0,
-        ]
+        [id, step.step_number, step.name, step.price || 0],
       );
     }
 
@@ -270,7 +274,7 @@ export const updateProduct = async (req, res) => {
       DELETE FROM crepe_formulas
       WHERE product_id = $1
       `,
-      [id]
+      [id],
     );
 
     for (const formula of crepeFormulas) {
@@ -286,18 +290,13 @@ export const updateProduct = async (req, res) => {
         )
         VALUES ($1,$2,$3)
         `,
-        [
-          id,
-          formula.name,
-          formula.price || 0,
-        ]
+        [id, formula.name, formula.price || 0],
       );
     }
 
     return res.json({
       message: "Produit modifié avec succès",
     });
-
   } catch (error) {
     console.error(error);
 
