@@ -2,17 +2,18 @@ import pool from "../config/db.js";
 
 export const createOrder = async (req, res) => {
   try {
-    const {
-      customerName,
-      phone,
-      address,
-      neighborhood,
-      comment,
-      subtotal,
-      deliveryFee,
-      total,
-      items,
-    } = req.body;
+   const {
+  customerName,
+  phone,
+  address,
+  neighborhood,
+  comment,
+  subtotal,
+  deliveryFee,
+  total,
+  orderType,
+  items,
+} = req.body;
 
     // Recherche client par téléphone
     let customer = await pool.query(
@@ -53,29 +54,31 @@ export const createOrder = async (req, res) => {
     // Création commande
     const orderResult = await pool.query(
       `
-  INSERT INTO orders
-  (
-    order_number,
-    customer_id,
-    subtotal,
-    delivery_fee,
-    total,
-    status,
-    comment
-  )
-  VALUES
-  ($1,$2,$3,$4,$5,$6,$7)
-  RETURNING *
+ INSERT INTO orders
+(
+  order_number,
+  customer_id,
+  subtotal,
+  delivery_fee,
+  total,
+  status,
+  comment,
+  order_type
+)
+VALUES
+($1,$2,$3,$4,$5,$6,$7,$8)
+RETURNING *
   `,
-      [
-        orderNumber,
-        customerId,
-        subtotal,
-        deliveryFee,
-        total,
-        "pending",
-        comment,
-      ],
+     [
+  orderNumber,
+  customerId,
+  subtotal,
+  deliveryFee,
+  total,
+  "pending",
+  comment,
+  orderType,
+],
     );
 
     const order = orderResult.rows[0];
@@ -136,6 +139,7 @@ export const getOrders = async (req, res) => {
         o.total,
         o.status,
         o.comment,
+        o.order_type,
         o.created_at,
 
         c.full_name,
