@@ -16,21 +16,27 @@ export const createOrder = async (req, res) => {
     } = req.body;
 
     // Recherche client par téléphone
-    let customer = await pool.query(
-      `
-  SELECT * FROM customers
-  WHERE phone = $1
-  `,
-      [phone],
-    );
+   
 
     let customerId;
 
-    if (customer.rows.length > 0) {
-      customerId = customer.rows[0].id;
-    } else {
-      const newCustomer = await pool.query(
-        `
+if (phone && phone.trim() !== "") {
+  const customer = await pool.query(
+    `
+    SELECT * FROM customers
+    WHERE phone = $1
+    `,
+    [phone]
+  );
+
+  if (customer.rows.length > 0) {
+    customerId = customer.rows[0].id;
+  }
+}
+
+if (!customerId) {
+  const newCustomer = await pool.query(
+    `
     INSERT INTO customers
     (
       full_name,
@@ -42,11 +48,11 @@ export const createOrder = async (req, res) => {
     ($1,$2,$3,$4)
     RETURNING *
     `,
-        [customerName, phone, address, neighborhood],
-      );
+    [customerName, phone, address, neighborhood]
+  );
 
-      customerId = newCustomer.rows[0].id;
-    }
+  customerId = newCustomer.rows[0].id;
+}
 
     // Génération numéro commande
     const orderNumber = "ORD-" + Date.now();
