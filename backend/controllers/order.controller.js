@@ -1,5 +1,5 @@
 import pool from "../config/db.js";
-
+import { io } from "../server.js";
 export const createOrder = async (req, res) => {
   try {
     const {
@@ -119,7 +119,7 @@ VALUES
         ],
       );
     }
-
+    io.emit("new-order", order);
     return res.status(201).json({
       message: "Commande créée avec succès",
       order,
