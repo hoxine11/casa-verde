@@ -2,18 +2,18 @@ import pool from "../config/db.js";
 
 export const createOrder = async (req, res) => {
   try {
-   const {
-  customerName,
-  phone,
-  address,
-  neighborhood,
-  comment,
-  subtotal,
-  deliveryFee,
-  total,
-  orderType,
-  items,
-} = req.body;
+    const {
+      customerName,
+      phone,
+      address,
+      neighborhood,
+      comment,
+      subtotal,
+      deliveryFee,
+      total,
+      orderType,
+      items,
+    } = req.body;
 
     // Recherche client par téléphone
     let customer = await pool.query(
@@ -69,16 +69,16 @@ VALUES
 ($1,$2,$3,$4,$5,$6,$7,$8)
 RETURNING *
   `,
-     [
-  orderNumber,
-  customerId,
-  subtotal,
-  deliveryFee,
-  total,
-  "pending",
-  comment,
-  orderType,
-],
+      [
+        orderNumber,
+        customerId,
+        subtotal,
+        deliveryFee,
+        total,
+        "pending",
+        comment,
+        orderType,
+      ],
     );
 
     const order = orderResult.rows[0];
@@ -91,18 +91,21 @@ RETURNING *
 
       await pool.query(
         `
-    INSERT INTO order_items
-    (
-      order_id,
-      product_id,
-      quantity,
-      unit_price,
-      total_price,
-      variant_name,
-      option_name
-    )
-    VALUES ($1,$2,$3,$4,$5,$6,$7)
-    `,
+INSERT INTO order_items
+(
+  order_id,
+  product_id,
+  quantity,
+  unit_price,
+  total_price,
+  variant_name,
+  option_name,
+  crepe_steps,
+  formula_name
+)
+VALUES
+($1,$2,$3,$4,$5,$6,$7,$8,$9)
+`,
         [
           order.id,
           item.productId,
@@ -111,6 +114,8 @@ RETURNING *
           item.price * item.quantity,
           item.variantName,
           item.optionName,
+          item.crepeSteps,
+          item.formulaName,
         ],
       );
     }
@@ -166,6 +171,8 @@ export const getOrders = async (req, res) => {
     oi.unit_price,
     oi.variant_name,
     oi.option_name,
+    oi.crepe_steps,
+    oi.formula_name,
 
     p.name
 
@@ -187,6 +194,8 @@ export const getOrders = async (req, res) => {
 
         variant_name: item.variant_name,
         option_name: item.option_name,
+        crepe_steps: item.crepe_steps,
+        formula_name: item.formula_name,
       }));
     }
 
