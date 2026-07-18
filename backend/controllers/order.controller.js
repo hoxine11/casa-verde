@@ -1,6 +1,7 @@
 import pool from "../config/db.js";
 import { io } from "../server.js";
 export const createOrder = async (req, res) => {
+  console.log("===== NEW VERSION =====");
   try {
     const {
       customerName,
