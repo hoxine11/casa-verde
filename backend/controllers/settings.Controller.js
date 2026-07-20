@@ -30,7 +30,9 @@ export const updateSettings = async (req, res) => {
       address,
       deliveryFee,
       facebook,
-      instagram
+      instagram,
+        is_open
+
     } = req.body;
 
     await pool.query(
@@ -42,7 +44,8 @@ export const updateSettings = async (req, res) => {
         address = $3,
         delivery_fee = $4,
         facebook = $5,
-        instagram = $6
+        instagram = $6,
+        is_open = $7
       WHERE id = 1
       `,
       [
@@ -51,7 +54,8 @@ export const updateSettings = async (req, res) => {
         address,
         deliveryFee, // maintenant c'est un texte
         facebook,
-        instagram
+        instagram,
+        is_open
       ]
     );
 
